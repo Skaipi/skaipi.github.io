@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skaipi - Painful path of configuring JS environment</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/headers.css">
+    <link rel="stylesheet" href="../css/prism.css">
+    <script src="../js/prism.js"></script>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav>
+                <h1><a href="/">Mateusz Skarupski</a></h1>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#blog">CV</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main>
+        <div class="container">
+
+            <h1>Painful path of configuring JS environment</h1>
+            <p>I recently started writing React component library for a sole purpose of learning. I thought that process of turning already written code into a module will be straightforward. Could I be more wrong? It took me a total of a few days to fully set up a good environment for my codebase and understand what I&#39;m doing. In this post I&#39;m going to sketch the landscape of obstacles I encountered along the way.</p>
+            <h2 id="what-is-a-javascritp-module-">What is a JavaScritp module?</h2>
+            <p>To begin discussion about JS modules, it would be wise to first describe what actually those modules are. First of all, there isn&#39;t (unfortunately) one standard way implementing module. For the sake of simplicity I will describe only some of them, which in my opinion are the most important. Those will be <code>CommonJS</code>, <code>UMD</code> and <code>ESModules</code>.</p>
+            <h3 id="umd">UMD</h3>
+            <p>A Universal Module Definition (UMD) is probably a most comfortable module handling for older readers (those who remember the glory days of JQuery). UMD module is one-file library that is meant to be included via <code>&lt;script&gt;</code> tag in <code>index.html</code>. It exposes it&#39;s functionalities by attaching an object to <code>globalThis</code> (for example <code>window.$</code> or <code>window.React</code>). As it turns out there are still some projects that take advantage of this approach. </p>
+            <h3 id="commonjs">CommonJS</h3>
+            <p>CommonJS are Node specific modules, which reader might associate with <code>module.export</code> and <code>require()</code> statements. An immediate question for me was: why should I care for Node modules, while creating purely browser-based library? The answer was quite obvious. Namely, Compatibility with older environments and build tools. As it turns out there are still many projects that use those modules. </p>
+            <h3 id="esmodules">ESModules</h3>
+            <p>ESModules are native JavaScript modules that can be resolved by every <strong>modern</strong> browser. Keywords used within ESModules are <code>import ... from &quot;...&quot;</code> and <code>export {...}</code>. Using those modules allows bundlers to apply <code>tree-shaking</code> mechanism, which ensures that only needed code will be imported.</p>
+            <h2 id="toolchain-for-writing-a-library">Toolchain for writing a library</h2>
+            <p>When writing a library, we aim to create the most general solutions possible to fit a wide range of use cases. For this reason, I decided to use a set of tools to organize my code and ensure a consistent style. I used TypeScript to describe interfaces of exported objects, Prettier and ESLint to maintain consistency, and Babel + Webpack to transpile and bundle the entire project. The downside of this toolchain is that every connection between tools requires a plugin, leading to nearly 500 packages just to parse my code — and I haven&#39;t even included any testing libraries yet.</p>
+            <img class="post-image" src="../img/js-tools-pipeline.png"/>
+            <p>Despite the connection between ESLint and Babel in the diagram, we actually need to configure TypeScript to work with Babel.</p>
+            <h3 id="configuring-tools">Configuring tools</h3>
+            <p>What I find controversial about this pipeline is the extent to which each tool is configurable. ESLint, the most commonly used linter for JavaScript, has almost 200 parameters that can be set. If I had to choose between Python&#39;s Black linter, which has exactly zero parameters, and ESLint, I would certainly prefer Black. The Webpack configuration file for <code>Create React App</code>, a boilerplate for creating React apps, at the time of writing this article, has over 800 lines. Even TypeScript, the language I chose, has its own configuration file. Last but not least, it is common to add logic via environment variables to the bundler, allowing it to behave differently for development and production builds. Additional variables might also be added to compile differently for various module types.</p>
+            <h3 id="conclusions">Conclusions</h3>
+            <p>Given the amount of ecosystem and tool-specific knowledge required to prepare a custom environment for a TypeScript project, I think it can be overwhelming and discouraging for less experienced developers to experiment with the language. The current state of front-end development almost inevitably forces developers to use tools they don&#39;t fully understand.</p>
+
+        </div>
+    </main>
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Mateusz Skarupski. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,67 @@
+/* General Styles for All Headers */
+h1, h2, h3, h4, h5, h6 {
+    color: #E1E8ED; /* Match the general text color */
+    font-family: 'Roboto', Arial, sans-serif; /* Consistent with body font */
+    font-weight: 700; /* Bold headers for emphasis */
+    margin-bottom: 20px; /* Space below headers */
+}
+
+/* Specific Styles for Different Header Levels */
+h1:not(#hero h1) {
+    font-size: 2.5em;
+    border-bottom: 2px solid #FFC857; /* Subtle underline for h1 */
+    padding-bottom: 10px;
+}
+
+h2:not(#hero h2) {
+    font-size: 2em;
+    border-left: 5px solid #2CB67D; /* Vertical accent line for h2 */
+    padding-left: 15px;
+}
+
+h3 {
+    font-size: 1.75em;
+    color: #FFC857; /* Different color for h3 */
+}
+
+h4 {
+    font-size: 1.5em;
+    color: #9ECB6A; /* Different color for h4 */
+}
+
+h5 {
+    font-size: 1.25em;
+    color: #56B6C2; /* Different color for h5 */
+}
+
+h6 {
+    font-size: 1em;
+    color: #6A737D; /* Softer color for h6 */
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2em;
+    }
+    
+    h2 {
+        font-size: 1.75em;
+    }
+
+    h3 {
+        font-size: 1.5em;
+    }
+
+    h4 {
+        font-size: 1.25em;
+    }
+
+    h5 {
+        font-size: 1.1em;
+    }
+
+    h6 {
+        font-size: 0.9em;
+    }
+}

@@ -14,6 +14,11 @@ body {
     padding: 0 20px;
 }
 
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
 header {
     background-color: #0D1117;
     border-bottom: 1px solid #FFC857;
@@ -42,7 +47,6 @@ nav ul li {
 
 nav ul li a {
     color: #B2B9BF;
-    text-decoration: none;
     transition: color 0.3s;
 }
 
@@ -134,6 +138,10 @@ section:not(:last-child) {
     color: #1D9E6C;
 }
 
+.post-image {
+
+}
+
 footer {
     background-color: #0D1117;
     text-align: center;
@@ -144,4 +152,41 @@ footer {
 footer p {
     color: #B2B9BF;
     font-size: 0.9em;
+}
+
+/* Prism config */
+pre[class*="language-"], code[class*="language-"] {
+    background: #161B22 !important; 
+    color: #E1E8ED;
+    font-family: 'Roboto Mono', monospace; 
+    border-radius: 5px;
+    padding: 15px;
+    overflow-x: auto;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+    color: #6A737D; 
+}
+
+.token.punctuation {
+    color: #E1E8ED; 
+}
+
+.token.keyword {
+    color: #FF9E64;
+}
+
+.token.string {
+    color: #9ECB6A;
+}
+
+.token.function {
+    color: #D19A66;
+}
+
+.token.operator {
+    color: #56B6C2; 
 }
