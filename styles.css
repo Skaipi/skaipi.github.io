@@ -1,0 +1,147 @@
+body {
+    background-color: #0D1117;
+    color: #E1E8ED;
+    font-family: 'Roboto', Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+header {
+    background-color: #0D1117;
+    border-bottom: 1px solid #FFC857;
+    padding: 20px 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+header h1 {
+    display: inline-block;
+    color: #E1E8ED;
+    font-size: 1.8em;
+}
+
+nav ul {
+    list-style: none;
+    display: inline-block;
+    float: right;
+}
+
+nav ul li {
+    display: inline;
+    margin-left: 20px;
+}
+
+nav ul li a {
+    color: #B2B9BF;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+nav ul li a:hover {
+    color: #2CB67D;
+}
+
+section {
+    padding: 60px 20px;
+}
+
+section:not(:last-child) {
+    border-bottom: 1px solid #FFC857;
+}
+
+#hero {
+    text-align: center;
+    padding: 100px 20px;
+    background: linear-gradient(135deg, #1C1E22 0%, #0D1117 100%);
+}
+
+#hero h2 {
+    color: #E1E8ED;
+    font-size: 2.5em;
+    margin-bottom: 20px;
+}
+
+#hero p {
+    color: #B2B9BF;
+    font-size: 1.2em;
+    margin-bottom: 30px;
+}
+
+#hero button {
+    background-color: #2CB67D;
+    border: none;
+    color: #0D1117;
+    padding: 15px 30px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+    border-radius: 5px;
+}
+
+#hero button:hover {
+    background-color: #1D9E6C;
+    transform: translateY(-2px);
+}
+
+#about h2, #latest-posts h2 {
+    color: #E1E8ED;
+    font-size: 2em;
+    margin-bottom: 20px;
+}
+
+#about p, #latest-posts p {
+    color: #B2B9BF;
+}
+
+.post-card {
+    background-color: #161B22;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    transition: box-shadow 0.3s;
+}
+
+.post-card:hover {
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.post-card h3 {
+    color: #E1E8ED;
+    margin-bottom: 10px;
+}
+
+.post-card p {
+    color: #B2B9BF;
+    margin-bottom: 10px;
+}
+
+.post-card a {
+    color: #2CB67D;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.post-card a:hover {
+    color: #1D9E6C;
+}
+
+footer {
+    background-color: #0D1117;
+    text-align: center;
+    padding: 20px 0;
+    border-top: 1px solid #FFC857;
+}
+
+footer p {
+    color: #B2B9BF;
+    font-size: 0.9em;
+}
