@@ -18,9 +18,9 @@ layout: default
             </p>
         </section>
         <section id="latest-posts">
+            <h2>My recent activity</h2>
 
             {% for post in site.posts %}
-            <h2>My recent activity</h2>
             <div class="post-card">
                 <h3>{{ post.title }}</h3>
                 <p>{{ post.content | markdownify | strip_html | truncatewords: 50 }}</p>
