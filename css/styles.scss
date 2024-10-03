@@ -1,3 +1,4 @@
+
 *,
 *::before,
 *::after {
@@ -44,26 +45,27 @@ header h1 {
     font-size: 1.8em;
 }
 
-nav ul {
+nav { 
+  ul {
     list-style: none;
     display: inline-block;
     float: right;
     position: relative;
-}
-
-nav ul li {
-    display: inline;
-    margin-left: 20px;
-    position: relative;
-}
-
-nav ul li a {
-    color: #B2B9BF;
-    transition: color 0.3s;
-}
-
-nav ul li a:hover {
-    color: #2CB67D;
+ 
+    li {
+        display: inline;
+        margin-left: 20px;
+        position: relative;
+    
+      a {
+        color: #B2B9BF;
+        transition: color 0.3s;
+        &:hover {
+          color: #2CB67D;
+        }
+      }
+    }
+  }
 }
 
 /* dropdown container */
