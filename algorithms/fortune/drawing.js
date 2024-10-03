@@ -16,7 +16,7 @@ export class Painter {
     for (let i = 0; i < sites.length; i++) {
       const p = sites[i];
       this.ctx.beginPath();
-      this.ctx.arc(p.x, p.y, 6, 0, Math.PI * 2, true);
+      this.ctx.arc(p.x, p.y, 3, 0, Math.PI * 2, true);
       this.ctx.closePath();
       this.ctx.fill();
     }
