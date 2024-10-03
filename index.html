@@ -6,20 +6,28 @@ layout: default
     <div class="container">
         <section id="hero">
             <h2>Hello World!</h2>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-            <button>Read More</button>
+            <p>Stay awhile and listen.</p>
+            <a href="#latest-posts"><button>Blog Posts</button></a>
         </section>
         <section id="about">
             <h2>About Me</h2>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris vel tortor id ipsum scelerisque euismod et ac lorem. Etiam gravida, magna sit amet euismod ornare, risus neque suscipit metus, ut rutrum urna nunc eu purus. Suspendisse molestie mi nec massa iaculis tempor.</p>
+            <p>
+                I am a PhD student in Computer Science, with a focus on the construction and analysis of clustering algorithms. My academic interests include cryptography, particularly public key cryptography and the underlying mathematical principles. Naturally, this also extends to quantum computing and low-level engineering.
+                <br><br>
+                In addition to my research, I enjoy participating in CTF challenges and attending hackathons, where I can apply my skills in a competitive environment. Outside of this technical work, I’m passionate about sports, especially Olympic weightlifting, which I often admire more than actively practice.
+            </p>
         </section>
         <section id="latest-posts">
+
+            {% for post in site.posts %}
             <h2>My recent activity</h2>
             <div class="post-card">
-                <h3>Configuring JS environment</h3>
-                <p>I recently started writing React component library for a sole purpose of learning. I thought that process of turning already written code into a module will be straightforward. Could I be more wrong? It took me a total of a few days to fully set up a good environment for my codebase and understand what I&#39;m doing. In this post I&#39;m going to sketch the landscape of obstacles I encountered along the way.</p>
-                <a href="articles/js-config.html">Read More</a>
+                <h3>{{ post.title }}</h3>
+                <p>{{ post.content | markdownify | strip_html | truncatewords: 50 }}</p>
+                <a href="{{ post.url }}">Read More</a>
             </div>
+            {% endfor %}
+
         </section>
     </div>
 </main>
