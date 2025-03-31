@@ -1,0 +1,33 @@
+---
+custom_css: /algorithms/rng/index.css
+title: Voronoi Graph Visualizer
+layout: default
+---
+<div class="canvas-wrapper">
+  <canvas id="canvas"></canvas>
+
+  <div id="controls-panel">
+    <h2>Controls</h2>
+
+    <div class="mode-container">
+      <label>
+        <input type="radio" name="mode" value="random" checked>
+        Random
+      </label>
+      <label>
+        <input type="radio" name="mode" value="lattice">
+        Lattice
+      </label>
+    </div>
+
+    <div class="search-connection-container">
+      <label for="searchGlobalConnections">
+        <input type="checkbox" id="searchGlobalConnections" checked>
+        Local connections
+      </label>
+    </div>
+
+    <button class="recompute-btn">RECOMPUTE</button>
+  </div>
+</div>
+<script src="./index.js" type="module" defer></script>

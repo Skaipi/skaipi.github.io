@@ -2,8 +2,8 @@
 
 import { Point } from "./point.js";
 import { Voronoi } from "./voronoi.js";
-import { throttle } from "./debounce.js";
 import { Painter } from "./drawing.js";
+import { throttle } from "../commons/debounce.js";
 
 const DEBAUNCE_TIME = 0;
 const modes = {

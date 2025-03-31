@@ -1,21 +1,26 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta charset="UTF-8">
-    <meta name="author" content="Mateusz Skarupski (Skaipi)">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ page.title }}</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
-    <link rel="stylesheet" href="/css/headers.css">
-    <link rel="stylesheet" href="/css/styles.css">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta charset="UTF-8">
+  <meta name="author" content="Mateusz Skarupski (Skaipi)">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ page.title }}</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+  <link rel="stylesheet" href="/css/headers.css">
+  <link rel="stylesheet" href="/css/styles.css">
+  {% if page.custom_css %}
+  <link rel="stylesheet" href="{{ page.custom_css }}">
+  {% endif %}
 </head>
+
 <body>
   {% include header.html %}
-  
+
   {{ content }}
 
   {% include footer.html %}
 </body>
+
 </html>

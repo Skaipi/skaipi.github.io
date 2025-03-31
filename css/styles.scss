@@ -1,4 +1,4 @@
---- 
+---
 ---
 
 /**/
@@ -77,6 +77,23 @@ nav {
                 }
             }
         }
+    }
+}
+
+
+button {
+    background-color: #2CB67D;
+    border: none;
+    color: #0D1117;
+    padding: 15px 30px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+    border-radius: 5px;
+
+    &:hover {
+        background-color: #1D9E6C;
+        transform: translateY(-2px);
     }
 }
 
@@ -167,22 +184,6 @@ section:not(:last-child) {
         color: #B2B9BF;
         font-size: 1.2em;
         margin-bottom: 30px;
-    }
-
-    button {
-        background-color: #2CB67D;
-        border: none;
-        color: #0D1117;
-        padding: 15px 30px;
-        font-size: 1em;
-        cursor: pointer;
-        transition: background-color 0.3s, transform 0.3s;
-        border-radius: 5px;
-
-        &:hover {
-            background-color: #1D9E6C;
-            transform: translateY(-2px);
-        }
     }
 }
 

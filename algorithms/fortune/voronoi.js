@@ -2,7 +2,7 @@ import { Edge } from "./edge.js";
 import { BeachlineEvent } from "./beachlineEvent.js";
 import { Parabola } from "./parabola.js";
 import { Point } from "./point.js";
-import { PriorityQueue } from "./priorityQueue.js";
+import { PriorityQueue } from "../commons/priorityQueue.js";
 import { FortuneBST } from "./binaryTree.js";
 
 /**
