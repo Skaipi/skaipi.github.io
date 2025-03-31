@@ -1,0 +1,25 @@
+---
+---
+
+.canvas-wrapper {
+  display: flex;
+  flex-flow: row nowrap;
+
+  button {
+    width: 100%;
+  }
+}
+
+#controls-panel {
+  width: 250px;
+  background-color: #0D1117;
+  color: #E1E8ED;
+  padding: 1rem;
+  overflow-y: auto;
+  border-left: solid 2px #FFC857;
+}
+
+#canvas {
+  flex: 1;
+  display: block;
+}
