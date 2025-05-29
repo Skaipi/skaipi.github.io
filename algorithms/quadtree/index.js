@@ -3,6 +3,7 @@
 import { Painter } from "./drawing.js";
 import { throttle } from "../commons/debounce.js";
 import { getRandomPoints } from "../commons/random.js";
+import { Quadtree } from "./quadtree.js";
 
 const DEBAUNCE_TIME = 0;
 
@@ -20,6 +21,9 @@ class InteractiveClient {
     this.context = canvas.getContext("2d");
     this.painter = new Painter(this.context);
     this.sites = getRandomPoints(100, this.width, this.height);
+    this.quadtree = new Quadtree(this.sites);
+
+    console.log(this.quadtree);
 
     canvas.onmousemove = this.onMouseMove.bind(this);
   }
@@ -34,6 +38,7 @@ class InteractiveClient {
   draw() {
     this.painter.drawBackground();
     this.painter.drawSites(this.sites);
+    this.painter.drawTree(this.quadtree);
   }
 
   static mouseX = (e) => e.clientX - e.target.offsetLeft;

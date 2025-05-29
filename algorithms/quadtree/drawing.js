@@ -26,4 +26,25 @@ export class Painter {
 
     this.ctx.globalAlpha = 1;
   };
+
+  drawTree(tree) {
+    this.ctx.strokeStyle = this.VORONOI_EDGE_COLOR;
+    this.ctx.lineWidth = 1;
+
+    const unvisitedNodes = [tree.root];
+    while (unvisitedNodes.length > 0) {
+      const node = unvisitedNodes.shift();
+      if (node.points.length === 0) continue;
+      console.log(node);
+
+      this.ctx.beginPath();
+      this.ctx.rect(node.boundary.x0, node.boundary.y0, node.boundary.x1 - node.boundary.x0, node.boundary.y1 - node.boundary.y0);
+      this.ctx.stroke();
+      this.ctx.closePath();
+
+      for (const child of node.children || []) {
+        unvisitedNodes.push(child);
+      }
+    }
+  }
 }
