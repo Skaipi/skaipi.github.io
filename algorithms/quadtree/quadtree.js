@@ -1,7 +1,6 @@
 class ZCurvePoint {
   constructor(point) {
-    this.x = point.x;
-    this.y = point.y;
+    Object.assign(this, point); // Copy all properties
     this.zIndex = this.getZCurveIndex(point.x, point.y);
   }
 
@@ -23,7 +22,7 @@ class ZCurvePoint {
 }
 
 class QuadNode {
-  constructor(boundary, capacity) {
+  constructor(boundary, capacity = 1) {
     this.boundary = boundary;
     this.capacity = capacity;
     this.points = [];
@@ -45,6 +44,14 @@ class QuadNode {
       new QuadNode({ x0,  y0: y0 + my, x1: x1 - mx, y1 }, this.capacity), // SW
       new QuadNode({ x0: x0 + mx, y0: y0 + my, x1,  y1 }, this.capacity), // SE
     ];
+
+    // Pass over points to children
+    this.points.forEach(point => {
+      this.children.forEach(child => {
+          if (child.insert(point)) return;
+      })
+    });
+    this.points = [];
   }
 
   insert(point) {
@@ -66,22 +73,21 @@ class QuadNode {
   }
 }
 
+const PADDING = 10;
+
 export class Quadtree {
-  constructor(points) {
-    const xs = points.map(p => p.x);
-    const ys = points.map(p => p.y);
-    const minX = Math.min(...xs);
-    const minY = Math.min(...ys);
-    const maxX = Math.max(...xs);
-    const maxY = Math.max(...ys);
-    const eps = 1e-6;
+  constructor(points, width, height) {
+    const minX = PADDING;
+    const minY = PADDING;
+    const maxX = width - PADDING;
+    const maxY = height - PADDING;
 
     this.root = new QuadNode({
-      x0: minX - eps,
-      y0: minY - eps,
-      x1: maxX + eps,
-      y1: maxY + eps
-    }, 2); 
+      x0: minX,
+      y0: minY,
+      x1: maxX,
+      y1: maxY
+    }); 
 
     const zPoints = points.map(point => new ZCurvePoint(point)); 
     zPoints.sort((a, b) => a.zIndex - b.zIndex);

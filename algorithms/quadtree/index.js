@@ -2,10 +2,10 @@
 
 import { Painter } from "./drawing.js";
 import { throttle } from "../commons/debounce.js";
-import { getRandomPoints } from "../commons/random.js";
-import { Quadtree } from "./quadtree.js";
+import { generateHierarchicalCluster, step } from "./simulation.js";
 
 const DEBAUNCE_TIME = 0;
+const ITEMS_AMOUNT = 600;
 
 const resizeCanvas = () => {
   const header = document.getElementsByTagName("header")[0];
@@ -20,12 +20,8 @@ class InteractiveClient {
   constructor(canvas) {
     this.context = canvas.getContext("2d");
     this.painter = new Painter(this.context);
-    this.sites = getRandomPoints(100, this.width, this.height);
-    this.quadtree = new Quadtree(this.sites);
-
-    console.log(this.quadtree);
-
-    canvas.onmousemove = this.onMouseMove.bind(this);
+    this.sites = generateHierarchicalCluster(ITEMS_AMOUNT, this.width, this.height);
+    // canvas.onmousemove = this.onMouseMove.bind(this);
   }
 
   get width() {
@@ -36,9 +32,12 @@ class InteractiveClient {
   }
 
   draw() {
+    this.quadtree = step(this.sites, this.width, this.height);
+
     this.painter.drawBackground();
     this.painter.drawSites(this.sites);
     this.painter.drawTree(this.quadtree);
+    requestAnimationFrame(this.draw.bind(this));
   }
 
   static mouseX = (e) => e.clientX - e.target.offsetLeft;

@@ -34,17 +34,15 @@ export class Painter {
     const unvisitedNodes = [tree.root];
     while (unvisitedNodes.length > 0) {
       const node = unvisitedNodes.shift();
-      if (node.points.length === 0) continue;
-      console.log(node);
+      for (const child of node.children || []) {
+        unvisitedNodes.push(child);
+      }
+      if (node.points.length === 0 || node.children.length > 0) continue;
 
       this.ctx.beginPath();
       this.ctx.rect(node.boundary.x0, node.boundary.y0, node.boundary.x1 - node.boundary.x0, node.boundary.y1 - node.boundary.y0);
       this.ctx.stroke();
       this.ctx.closePath();
-
-      for (const child of node.children || []) {
-        unvisitedNodes.push(child);
-      }
     }
   }
 }
