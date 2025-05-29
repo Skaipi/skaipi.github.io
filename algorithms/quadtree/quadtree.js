@@ -73,21 +73,27 @@ class QuadNode {
   }
 }
 
-const PADDING = 10;
-
 export class Quadtree {
-  constructor(points, width, height) {
-    const minX = PADDING;
-    const minY = PADDING;
-    const maxX = width - PADDING;
-    const maxY = height - PADDING;
+  constructor(points, capacity = 1) {
+    let minX = Infinity;  
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    
+    for (let i=0; i<points.length; i++) {
+      const point = points[i];
+      if (point.x > 0 && point.x < minX) minX = point.x;
+      if (point.y > 0 && point.y < minY) minY = point.y;
+      if (point.x < window.innerWidth && point.x > maxX) maxX = point.x;
+      if (point.y < window.innerHeight && point.y > maxY) maxY = point.y;
+    }
 
     this.root = new QuadNode({
       x0: minX,
       y0: minY,
       x1: maxX,
       y1: maxY
-    }); 
+    }, capacity); 
 
     const zPoints = points.map(point => new ZCurvePoint(point)); 
     zPoints.sort((a, b) => a.zIndex - b.zIndex);

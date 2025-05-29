@@ -4,11 +4,13 @@ import { Quadtree } from "./quadtree.js";
 const G              = 20.0;   // grav. constant in screen units
 const THETA          = 0.55;  // Barnes–Hut opening angle (smaller = better ≈ slower)
 const EPS            = 4;   // Plummer softening (px) – prevents ejections
-const DT             = 0.002;   // timestep (px frame⁻¹  √(px / G·m)) – adjust to taste
 const PARTICLE_MASS  = 1.0;   // mass of every star (can vary, but unnecessary here)
 const SPLIT_PROB     = 0.55;  // P(split) at each recursion level when making the fractal
 const MAX_DEPTH      = 6;     // deeper → snowflakier clusters, ≈ 2^depth cells
-
+const DT_MIN   = 0.001;
+const DT_MAX   = 0.02;
+const DIRECTION = Math.random() <-1.5 ? Math.PI/2 : -Math.PI/2
+let dt = 0.005;
 
 class Particle {
   constructor(x, y) {
@@ -55,35 +57,42 @@ export const forceOn = (node, particle) => {
 
 // Get properties of the node
 export const accumulate = (node) => {
+  // Dirty trick to cache the payload
+  if (node._payload !== undefined) return node._payload;
+
   // Leaf node
   if (node.children.length === 0) {
-    // Empty leaf node
-    if (node.points.length === 0) return {mass: 0, comX: 0, comY: 0};
-
-    const p = node.points[0];
-    return {
-      mass: PARTICLE_MASS,
-      comX: p.x,
-      comY: p.y
+    // Compute payload for the leaf node
+    node._payload = {
+      mass: node.points.length * PARTICLE_MASS,
+      comX: 0,
+      comY: 0
     };
+
+    for (const p of node.points) {
+      node._payload.comX += p.x;
+      node._payload.comY += p.y;
+    }
+    node._payload.comX /= node.points.length;
+    node._payload.comY /= node.points.length;
+    return node._payload;
   }
 
   // Internal node
-  let m = 0, cx = 0, cy = 0;
-  for (const c of node.children) {
-    const {mass, comX, comY} = accumulate(c);
-    m  += mass;
-    cx += mass * comX;
-    cy += mass * comY;
+  let combinedMass = 0, combinedX = 0, combinedY = 0;
+  for (const child of node.children) {
+    const {mass, comX, comY} = accumulate(child);
+    combinedMass  += mass;
+    combinedX += mass * comX;
+    combinedY += mass * comY;
   }
 
-  if (m <= 0) return {mass: 0, comX: 0, comY: 0};
-
-  return {
-    mass: m,
-    comX: cx / m,
-    comY: cy / m
+  node._payload = {
+    mass: combinedMass,
+    comX: combinedMass > 0 ? combinedX / combinedMass : 0,
+    comY: combinedMass > 0 ? combinedY / combinedMass : 0
   };
+  return node._payload;
 }
 
 // ===== FRACTAL CLUSTER GENERATOR ============================================
@@ -115,17 +124,18 @@ export function generateHierarchicalCluster(n, w, h, depth = MAX_DEPTH, splitPro
   return pts;
 }
 
-function timestep(particles) {
-  let aMax = 0;
-  for (const p of particles) {
-    const a = Math.hypot(p.ax, p.ay);
-    if (a > aMax) aMax = a;
+function getTimestep(particles) {
+  let aMax = 0, vMax = 0;
+  for (let i = 0; i < particles.length; ++i) {
+    const p = particles[i];
+    aMax = Math.max(aMax, Math.hypot(p.ax, p.ay));
+    vMax = Math.max(vMax, Math.hypot(p.vx, p.vy)); // Maybe not needed
   }
   const eta = 0.2; // safety factor
-  return eta * Math.sqrt(EPS / (aMax + 1e-30));
+  const dtAcc = eta * Math.sqrt(EPS / (aMax + 1e-30));
+  const dtVel = eta * EPS / (vMax + 1e-30);
+  return Math.min(DT_MAX, Math.max(DT_MIN, Math.min(dtAcc, dtVel)));
 }
-
-let dt = 0.2;
 
 function virialKick(p, w, h, particles) {
   // circular speed in the global potential
@@ -133,7 +143,7 @@ function virialKick(p, w, h, particles) {
   const dy = p.y - h*0.5;
   const r  = Math.hypot(dx,dy) + 1e-9;
   const v  = Math.sqrt(G*particles.length*PARTICLE_MASS / (2*r));
-  const phi = Math.atan2(dy,dx) + (Math.random()<0.5?Math.PI/2:-Math.PI/2); // random pro/retro
+  const phi = Math.atan2(dy,dx) + DIRECTION;
   p.vx = v*Math.cos(phi);
   p.vy = v*Math.sin(phi);
 }
@@ -151,35 +161,42 @@ function virialise(particles) {
     }
   }
   const scale = Math.sqrt((-0.5*U) / K);   // want 2 K + U = 0
-  for (const p of particles) {
+  
+  for (let i = 0; i < particles.length; ++i) {
+    const p = particles[i];
     p.vx *= scale;
     p.vy *= scale;
   }
 }
 
 export function step(particles, width, height) {
-  for (const p of particles) {
-    p.vx += 0.5 * p.ax * DT;
-    p.vy += 0.5 * p.ay * DT;
+  // Update positions
+  for (let i = 0; i < particles.length; ++i) {
+    const p = particles[i];
+    p.vx += 0.5 * p.ax * dt;
+    p.vy += 0.5 * p.ay * dt;
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+
+    if (p.x < 0) { p.x = 0; p.vx = -p.vx; }
+    else if (p.x > width) { p.x = width; p.vx = -p.vx; }
+
+    if (p.y < 0) { p.y = 0; p.vy = -p.vy; }
+    else if (p.y > height){ p.y = height; p.vy = -p.vy; }
   }
 
-  for (const p of particles) {
-    p.x += p.vx * DT;
-    p.y += p.vy * DT;
-  }
-
-  const tree = new Quadtree(particles, width, height);
-  for (const p of particles) {
+  // Update forces
+  const treeCapacity = 4;
+  const tree = new Quadtree(particles, treeCapacity);
+  for (let i = 0; i < particles.length; ++i) {
+    const p = particles[i];
     const [fx, fy] = forceOn(tree.root, p);
     p.ax = fx / p.m;
     p.ay = fy / p.m;
+    p.vx += 0.5 * p.ax * dt;
+    p.vy += 0.5 * p.ay * dt;
   }
 
-  for (const p of particles) {
-    p.vx += 0.5 * p.ax * DT;
-    p.vy += 0.5 * p.ay * DT;
-  }
-
-  dt = timestep(particles);
+  dt = getTimestep(particles);
   return tree;
 }
