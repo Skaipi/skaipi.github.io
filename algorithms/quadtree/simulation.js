@@ -2,8 +2,8 @@ import { Quadtree } from "./quadtree.js";
 
 // ===== TUNABLE CONSTANTS ======================================================
 const G              = 20.0;   // grav. constant in screen units
-const THETA          = 0.55;  // Barnes–Hut opening angle (smaller = better ≈ slower)
-const EPS            = 4;   // Plummer softening (px) – prevents ejections
+const THETA          = 0.45;  // Barnes–Hut opening angle (smaller = better ≈ slower)
+const EPS            = 8;   // Plummer softening (px) – prevents ejections
 const PARTICLE_MASS  = 1.0;   // mass of every star (can vary, but unnecessary here)
 const SPLIT_PROB     = 0.55;  // P(split) at each recursion level when making the fractal
 const MAX_DEPTH      = 6;     // deeper → snowflakier clusters, ≈ 2^depth cells
@@ -38,8 +38,9 @@ export const forceOn = (node, particle) => {
 
   // Width of node
   const cellWidth = node.boundary.x1 - node.boundary.x0;
+  const cellHeight = node.boundary.y1 - node.boundary.y0;
 
-  if (node.children.length === 0 || (cellWidth*cellWidth) / distSq < THETA*THETA) {
+  if (node.children.length === 0 || (cellWidth*cellHeight) / distSq < THETA*THETA) {
     // Treat entire node as one mass
     const invDist3 = 1 / (distSq * Math.sqrt(distSq));
     const force = G * mass * invDist3;
@@ -95,7 +96,6 @@ export const accumulate = (node) => {
   return node._payload;
 }
 
-// ===== FRACTAL CLUSTER GENERATOR ============================================
 export function generateHierarchicalCluster(n, w, h, depth = MAX_DEPTH, splitProb = SPLIT_PROB) {
   const rootSize = 0.6 * Math.min(w, h);                    // keep a margin
   const x0 = w/2 - rootSize/2;

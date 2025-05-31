@@ -95,8 +95,8 @@ export class Quadtree {
       y1: maxY
     }, capacity); 
 
-    const zPoints = points.map(point => new ZCurvePoint(point)); 
-    zPoints.sort((a, b) => a.zIndex - b.zIndex);
-    zPoints.forEach((zIndex) => { this.root.insert(zIndex); });
+    // const zPoints = points.map(point => new ZCurvePoint(point)); 
+    // zPoints.sort((a, b) => a.zIndex - b.zIndex);
+    points.forEach((zIndex) => { this.root.insert(zIndex); });
   }
 }
