@@ -2,10 +2,10 @@
 
 import { Painter } from "./drawing.js";
 import { throttle } from "../commons/debounce.js";
-import { generateHierarchicalCluster, step } from "./simulation.js";
+// import { generateHierarchicalCluster, getState, step } from "./simulation.js";
+import { generateHierarchicalCluster, getState, step } from "./linearQuadtreeSimulation.js";
 
 const DEBAUNCE_TIME = 0;
-const ITEMS_AMOUNT = 600;
 
 const resizeCanvas = () => {
   const header = document.getElementsByTagName("header")[0];
@@ -14,14 +14,20 @@ const resizeCanvas = () => {
   const headerHeight = header.offsetHeight;
   canvas.height = window.innerHeight - headerHeight;
   canvas.width = window.innerWidth;
+  
 };
 
 class InteractiveClient {
   constructor(canvas) {
     this.context = canvas.getContext("2d");
     this.painter = new Painter(this.context);
-    this.sites = generateHierarchicalCluster(ITEMS_AMOUNT, this.width, this.height);
+    this.sites = generateHierarchicalCluster(this.width, this.height);
     // canvas.onmousemove = this.onMouseMove.bind(this);
+
+    this.showGrid = true;
+    canvas.addEventListener("click", (e) => {
+      this.showGrid = !this.showGrid;
+    });
   }
 
   get width() {
@@ -32,11 +38,16 @@ class InteractiveClient {
   }
 
   draw() {
-    this.quadtree = step(this.sites, this.width, this.height);
+    const quadtree = step(this.width, this.height);
+    const sites = getState();
 
     this.painter.drawBackground();
-    this.painter.drawSites(this.sites);
-    this.painter.drawTree(this.quadtree);
+    this.painter.drawSites(sites);
+    // this.painter.drawLinearSites(sites);
+    if (this.showGrid){
+      this.painter.drawTree(quadtree);
+      // this.painter.drawLinearTree(quadtree);
+    }
     requestAnimationFrame(this.draw.bind(this));
   }
 

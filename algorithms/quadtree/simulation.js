@@ -1,12 +1,13 @@
 import { Quadtree } from "./quadtree.js";
 
 // ===== TUNABLE CONSTANTS ======================================================
-const G              = 20.0;   // grav. constant in screen units
-const THETA          = 0.45;  // Barnes–Hut opening angle (smaller = better ≈ slower)
-const EPS            = 8;   // Plummer softening (px) – prevents ejections
-const PARTICLE_MASS  = 1.0;   // mass of every star (can vary, but unnecessary here)
-const SPLIT_PROB     = 0.55;  // P(split) at each recursion level when making the fractal
-const MAX_DEPTH      = 6;     // deeper → snowflakier clusters, ≈ 2^depth cells
+const N = 600;
+const G              = 20.0; // grav. constant in screen units
+const THETA          = 0.45; // Barnes–Hut opening angle (smaller = better ≈ slower)
+const EPS            = 8; // Plummer softening (px) – prevents ejections
+const PARTICLE_MASS  = 1.0; // mass of every star (can vary, but unnecessary here)
+const SPLIT_PROB     = 0.55;
+const MAX_DEPTH      = 6;
 const DT_MIN   = 0.001;
 const DT_MAX   = 0.02;
 const DIRECTION = Math.random() <-1.5 ? Math.PI/2 : -Math.PI/2
@@ -23,6 +24,10 @@ class Particle {
     this.m  = PARTICLE_MASS;
   }
 }
+
+const particles = [];
+
+export const getState = () => particles;
 
 // force applied on particle by the node
 export const forceOn = (node, particle) => {
@@ -56,7 +61,7 @@ export const forceOn = (node, particle) => {
   }
 }
 
-// Get properties of the node
+// TODO: Move this to a quadtree constructor
 export const accumulate = (node) => {
   // Dirty trick to cache the payload
   if (node._payload !== undefined) return node._payload;
@@ -96,32 +101,31 @@ export const accumulate = (node) => {
   return node._payload;
 }
 
-export function generateHierarchicalCluster(n, w, h, depth = MAX_DEPTH, splitProb = SPLIT_PROB) {
-  const rootSize = 0.6 * Math.min(w, h);                    // keep a margin
-  const x0 = w/2 - rootSize/2;
-  const y0 = h/2 - rootSize/2;
-  const pts = [];
+export function generateHierarchicalCluster(width, height) {
+  const rootSize = 0.6 * Math.min(width, height);
+  const x0 = width/2 - rootSize/2;
+  const y0 = height/2 - rootSize/2;
 
   // Each particle individually walks a random path down the quad‑tree. Much
   // simpler than bookkeeping cell occupancies, and statistically identical.
-  for (let i = 0; i < n; ++i) {
+  for (let i = 0; i < N; ++i) {
     let cx = x0, cy = y0, size = rootSize;
-    for (let d = 0; d < depth; ++d) {
-      if (Math.random() >= splitProb) break;  // stop splitting here
+    for (let d = 0; d < MAX_DEPTH; ++d) {
+      if (Math.random() >= SPLIT_PROB) break;
       size /= 2;
       const quad = Math.floor(Math.random() * 4);
-      if (quad & 1) cx += size;              // East
-      if (quad & 2) cy += size;              // South
+      if (quad & 1) cx += size; // East
+      if (quad & 2) cy += size; // South
     }
-    // Uniform position within final cell + tiny jitter so no two overlap exactly
+    // Avaoid overlap with random offset
     const x = cx + Math.random() * size;
     const y = cy + Math.random() * size;
-    pts.push(new Particle(x, y));
+    particles.push(new Particle(x, y));
   }
 
-  pts.forEach(p => virialKick(p, w, h, pts));
-  virialise(pts);
-  return pts;
+  particles.forEach(p => virialKick(p, width, height, particles));
+  virialise(particles);
+  return particles;
 }
 
 function getTimestep(particles) {
@@ -169,7 +173,7 @@ function virialise(particles) {
   }
 }
 
-export function step(particles, width, height) {
+export function step(width, height) {
   // Update positions
   for (let i = 0; i < particles.length; ++i) {
     const p = particles[i];
