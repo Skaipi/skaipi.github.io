@@ -1,3 +1,5 @@
+import { deinterleave, morton32DecodeInt } from "./linearQuadtree.js";
+
 export class Painter {  
   constructor(context, config = {}) {
     this.ctx = context;
@@ -11,6 +13,25 @@ export class Painter {
     this.ctx.fillStyle = this.BACKGROUND_COLOR;
     this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
   };
+
+  drawTree = (tree) => {
+    this.ctx.strokeStyle = this.VORONOI_EDGE_COLOR;
+    this.ctx.lineWidth = 1;
+    
+    const unvisitedNodes = [tree.root];
+    while (unvisitedNodes.length > 0) {
+      const node = unvisitedNodes.shift();
+      for (const child of node.children || []) {
+        unvisitedNodes.push(child);
+      }
+      if (node.points.length === 0 || node.children.length > 0) continue;
+
+      this.ctx.beginPath();
+      this.ctx.rect(node.boundary.x0, node.boundary.y0, node.boundary.x1 - node.boundary.x0, node.boundary.y1 - node.boundary.y0);
+      this.ctx.stroke();
+      this.ctx.closePath();
+    }
+  } 
 
   drawSites = (sites) => {
     this.ctx.fillStyle = this.SITE_COLOR;
@@ -27,20 +48,29 @@ export class Painter {
     this.ctx.globalAlpha = 1;
   };
 
-  drawTree(tree) {
+  drawLinearSites = (wrapper) => {
+    const { x, y } = wrapper;
+    this.ctx.fillStyle = this.SITE_COLOR;
+    for (let i = 0; i < x.length; i++) {
+      this.ctx.beginPath();
+      this.ctx.fillStyle = this.SITE_COLOR;
+      this.ctx.arc(x[i], y[i], 2, 0, Math.PI * 2, true);
+      this.ctx.closePath();
+      this.ctx.fill();
+    }
+  }
+
+  drawLinearTree(tree) {
     this.ctx.strokeStyle = this.VORONOI_EDGE_COLOR;
     this.ctx.lineWidth = 1;
 
-    const unvisitedNodes = [tree.root];
-    while (unvisitedNodes.length > 0) {
-      const node = unvisitedNodes.shift();
-      for (const child of node.children || []) {
-        unvisitedNodes.push(child);
-      }
-      if (node.points.length === 0 || node.children.length > 0) continue;
+    for (let i = 0; i < tree.cells.length; i++) {
+      const cell = tree.cells[i];
+
+      if (cell.count === 0) continue;
 
       this.ctx.beginPath();
-      this.ctx.rect(node.boundary.x0, node.boundary.y0, node.boundary.x1 - node.boundary.x0, node.boundary.y1 - node.boundary.y0);
+      this.ctx.rect(x0, y0, cellWidth, cellHeight);
       this.ctx.stroke();
       this.ctx.closePath();
     }
