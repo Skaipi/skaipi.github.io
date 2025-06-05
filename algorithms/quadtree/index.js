@@ -2,8 +2,8 @@
 
 import { Painter } from "./drawing.js";
 import { throttle } from "../commons/debounce.js";
-// import { generateHierarchicalCluster, getState, step } from "./simulation.js";
-import { generateHierarchicalCluster, getState, step } from "./linearQuadtreeSimulation.js";
+import { generateHierarchicalCluster, getState, step } from "./simulation.js";
+// import { generateHierarchicalCluster, getState, step } from "./linearQuadtreeSimulation.js";
 
 const DEBAUNCE_TIME = 0;
 
