@@ -1,6 +1,6 @@
 import { deinterleave, morton32DecodeInt } from "./linearQuadtree.js";
 
-export class Painter {  
+export class Painter {
   constructor(context, config = {}) {
     this.ctx = context;
     this.BACKGROUND_COLOR = config.backgroundColor ?? "#0D1117";
@@ -17,7 +17,7 @@ export class Painter {
   drawTree = (tree) => {
     this.ctx.strokeStyle = this.VORONOI_EDGE_COLOR;
     this.ctx.lineWidth = 1;
-    
+
     const unvisitedNodes = [tree.root];
     while (unvisitedNodes.length > 0) {
       const node = unvisitedNodes.shift();
@@ -27,11 +27,16 @@ export class Painter {
       if (node.points.length === 0 || node.children.length > 0) continue;
 
       this.ctx.beginPath();
-      this.ctx.rect(node.boundary.x0, node.boundary.y0, node.boundary.x1 - node.boundary.x0, node.boundary.y1 - node.boundary.y0);
+      this.ctx.rect(
+        node.boundary.x0,
+        node.boundary.y0,
+        node.boundary.x1 - node.boundary.x0,
+        node.boundary.y1 - node.boundary.y0,
+      );
       this.ctx.stroke();
       this.ctx.closePath();
     }
-  } 
+  };
 
   drawSites = (sites) => {
     this.ctx.fillStyle = this.SITE_COLOR;
@@ -58,7 +63,7 @@ export class Painter {
       this.ctx.closePath();
       this.ctx.fill();
     }
-  }
+  };
 
   drawLinearTree(tree) {
     this.ctx.strokeStyle = this.VORONOI_EDGE_COLOR;

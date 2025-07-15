@@ -13,7 +13,8 @@ export function debounce(func, wait, options) {
   let trailing = true;
 
   // Bypass `requestAnimationFrame` by explicitly setting `wait=0`.
-  const useRAF = !wait && wait !== 0 && typeof window.requestAnimationFrame === "function";
+  const useRAF =
+    !wait && wait !== 0 && typeof window.requestAnimationFrame === "function";
 
   if (typeof func !== "function") {
     throw new TypeError("Expected a function");
@@ -41,7 +42,6 @@ export function debounce(func, wait, options) {
       window.cancelAnimationFrame(timerId);
       return window.requestAnimationFrame(pendingFunc);
     }
-    // eslint-disable-next-line @typescript-eslint/no-implied-eval
     return setTimeout(pendingFunc, milliseconds);
   }
 
@@ -67,7 +67,9 @@ export function debounce(func, wait, options) {
     const timeSinceLastInvoke = time - lastInvokeTime;
     const timeWaiting = wait - timeSinceLastCall;
 
-    return maxing ? Math.min(timeWaiting, maxWait - timeSinceLastInvoke) : timeWaiting;
+    return maxing
+      ? Math.min(timeWaiting, maxWait - timeSinceLastInvoke)
+      : timeWaiting;
   }
 
   function shouldInvoke(time) {

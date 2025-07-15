@@ -6,13 +6,13 @@ class ZCurvePoint {
 
   // Spread bits of 16 bit integer to every second bit of a 32 bit integer
   spreadBits(number) {
-    number &= 0xFFFF; // Ensure number is 16 bits
-    number = (number | (number <<  8)) & 0x00FF00FF; // 8-bit gaps
-    number = (number | (number <<  4)) & 0x0F0F0F0F; // 4-bit gaps
-    number = (number | (number <<  2)) & 0x33333333; // 2-bit gaps
-    number = (number | (number <<  1)) & 0x55555555; // 1-bit gaps
+    number &= 0xffff; // Ensure number is 16 bits
+    number = (number | (number << 8)) & 0x00ff00ff; // 8-bit gaps
+    number = (number | (number << 4)) & 0x0f0f0f0f; // 4-bit gaps
+    number = (number | (number << 2)) & 0x33333333; // 2-bit gaps
+    number = (number | (number << 1)) & 0x55555555; // 1-bit gaps
     return number;
-  } 
+  }
 
   getZCurveIndex() {
     const xBits = this.spreadBits(this.x);
@@ -39,17 +39,17 @@ class QuadNode {
     const mx = (x1 - x0) / 2;
     const my = (y1 - y0) / 2;
     this.children = [
-      new QuadNode({ x0,  y0, x1: x1 - mx, y1: y1 - my }, this.capacity), // NW
-      new QuadNode({ x0: x0 + mx, y0, x1,  y1: y1 - my }, this.capacity), // NE
-      new QuadNode({ x0,  y0: y0 + my, x1: x1 - mx, y1 }, this.capacity), // SW
-      new QuadNode({ x0: x0 + mx, y0: y0 + my, x1,  y1 }, this.capacity), // SE
+      new QuadNode({ x0, y0, x1: x1 - mx, y1: y1 - my }, this.capacity), // NW
+      new QuadNode({ x0: x0 + mx, y0, x1, y1: y1 - my }, this.capacity), // NE
+      new QuadNode({ x0, y0: y0 + my, x1: x1 - mx, y1 }, this.capacity), // SW
+      new QuadNode({ x0: x0 + mx, y0: y0 + my, x1, y1 }, this.capacity), // SE
     ];
 
     // Pass over points to children
-    this.points.forEach(point => {
-      this.children.forEach(child => {
-          if (child.insert(point)) return;
-      })
+    this.points.forEach((point) => {
+      this.children.forEach((child) => {
+        if (child.insert(point)) return;
+      });
     });
     this.points = [];
   }
@@ -75,12 +75,12 @@ class QuadNode {
 
 export class Quadtree {
   constructor(points, capacity = 1) {
-    let minX = Infinity;  
+    let minX = Infinity;
     let minY = Infinity;
     let maxX = -Infinity;
     let maxY = -Infinity;
-    
-    for (let i=0; i<points.length; i++) {
+
+    for (let i = 0; i < points.length; i++) {
       const point = points[i];
       if (point.x > 0 && point.x < minX) minX = point.x;
       if (point.y > 0 && point.y < minY) minY = point.y;
@@ -88,15 +88,20 @@ export class Quadtree {
       if (point.y < window.innerHeight && point.y > maxY) maxY = point.y;
     }
 
-    this.root = new QuadNode({
-      x0: minX,
-      y0: minY,
-      x1: maxX,
-      y1: maxY
-    }, capacity); 
+    this.root = new QuadNode(
+      {
+        x0: minX,
+        y0: minY,
+        x1: maxX,
+        y1: maxY,
+      },
+      capacity,
+    );
 
-    // const zPoints = points.map(point => new ZCurvePoint(point)); 
+    // const zPoints = points.map(point => new ZCurvePoint(point));
     // zPoints.sort((a, b) => a.zIndex - b.zIndex);
-    points.forEach((zIndex) => { this.root.insert(zIndex); });
+    points.forEach((zIndex) => {
+      this.root.insert(zIndex);
+    });
   }
 }

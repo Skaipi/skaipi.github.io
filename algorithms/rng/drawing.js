@@ -7,13 +7,13 @@ const isNeighbour = (p1, p2) => {
   });
 
   return found;
-}
+};
 
 const isTheSamePoint = (p1, p2) => {
   return p1?.x === p2?.x && p1?.y === p2?.y;
-}
+};
 
-export class Painter {  
+export class Painter {
   constructor(context, config = {}) {
     this.ctx = context;
     this.BACKGROUND_COLOR = config.backgroundColor ?? "#0D1117";
@@ -32,7 +32,12 @@ export class Painter {
     for (let i = 0; i < sites.length; i++) {
       const site = sites[i];
 
-      if (selectedSite === null || isTheSamePoint(site, selectedSite) || isNeighbour(site, selectedSite)) this.ctx.globalAlpha = 1;
+      if (
+        selectedSite === null ||
+        isTheSamePoint(site, selectedSite) ||
+        isNeighbour(site, selectedSite)
+      )
+        this.ctx.globalAlpha = 1;
       else this.ctx.globalAlpha = 0.1;
 
       this.ctx.beginPath();
@@ -58,7 +63,11 @@ export class Painter {
     for (let i = 0; i < sites.length; i++) {
       const site = sites[i];
 
-      if (selectedSite === null || (site.x === selectedSite?.x && site.y === selectedSite?.y)) this.ctx.globalAlpha = 1;
+      if (
+        selectedSite === null ||
+        (site.x === selectedSite?.x && site.y === selectedSite?.y)
+      )
+        this.ctx.globalAlpha = 1;
       else this.ctx.globalAlpha = 0.1;
 
       for (let j = 0; j < site.neighbours.length; j++) {

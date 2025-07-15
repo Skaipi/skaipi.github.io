@@ -20,7 +20,10 @@ export class Edge extends BSTNode {
     this.slope = (focusB.x - focusA.x) / (focusA.y - focusB.y);
     this.verticalOffset = start.y - this.slope * start.x;
     this.direction = new Point(focusB.y - focusA.y, -(focusB.x - focusA.x));
-    this.tmpEnd = new Point(start.x + this.direction.x, start.y + this.direction.y); // currently known second point of the line
+    this.tmpEnd = new Point(
+      start.x + this.direction.x,
+      start.y + this.direction.y,
+    ); // currently known second point of the line
 
     this.neighbour = null;
   }
@@ -60,7 +63,12 @@ export class Edge extends BSTNode {
   }
 
   getIntersectionPoint(other) {
-    const I = Edge.getLineIntersection(this.start, this.tmpEnd, other.start, other.tmpEnd);
+    const I = Edge.getLineIntersection(
+      this.start,
+      this.tmpEnd,
+      other.start,
+      other.tmpEnd,
+    );
     if (I === null) return null;
 
     const wrongDirection =

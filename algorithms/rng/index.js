@@ -70,9 +70,10 @@ class InteractiveClient {
   }
 
   updatePoints() {
-    this.sites = this.mode === modes.RANDOM 
-      ? getRandomPoints(100, this.width, this.height)
-      : getLatticePoints(this.width, this.height, 100);
+    this.sites =
+      this.mode === modes.RANDOM
+        ? getRandomPoints(100, this.width, this.height)
+        : getLatticePoints(this.width, this.height, 100);
     this.graph = new Graph(this.sites, this.useLocalSearch);
   }
 
@@ -89,7 +90,10 @@ class InteractiveClient {
   static mouseX = (e) => e.clientX - e.target.offsetLeft;
   static mouseY = (e) => e.clientY - e.target.offsetTop;
   onMouseMove(e) {
-    const requestDraw = DEBAUNCE_TIME > 16 ? throttle(this.draw.bind(this), DEBAUNCE_TIME) : this.draw.bind(this);
+    const requestDraw =
+      DEBAUNCE_TIME > 16
+        ? throttle(this.draw.bind(this), DEBAUNCE_TIME)
+        : this.draw.bind(this);
     const mouseX = InteractiveClient.mouseX(e);
     const mouseY = InteractiveClient.mouseY(e);
     let found = false;
