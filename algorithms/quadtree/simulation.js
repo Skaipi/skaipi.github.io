@@ -2,15 +2,15 @@ import { Quadtree } from "./quadtree.js";
 
 // ===== TUNABLE CONSTANTS ======================================================
 const N = 600;
-const G = 20.0; // grav. constant in screen units
-const THETA = 0.45; // Barnes–Hut opening angle (smaller = better ≈ slower)
-const EPS = 8; // Plummer softening (px) – prevents ejections
+const G = 60.0; // grav. constant in screen units
+const THETA = 0.25; // Barnes–Hut opening angle (smaller = better ≈ slower)
+const EPS = 2; // Plummer softening (px) – prevents ejections
 const PARTICLE_MASS = 1.0; // mass of every star (can vary, but unnecessary here)
 const SPLIT_PROB = 0.55;
 const MAX_DEPTH = 6;
 const DT_MIN = 0.001;
-const DT_MAX = 0.02;
-const DIRECTION = Math.random() < -1.5 ? Math.PI / 2 : -Math.PI / 2;
+const DT_MAX = 0.01;
+const DIRECTION = Math.random() < 0.5 ? Math.PI / 2 : -Math.PI / 2;
 let dt = 0.005;
 
 class Particle {
@@ -45,7 +45,7 @@ export const forceOn = (node, particle) => {
   const cellWidth = node.boundary.x1 - node.boundary.x0;
   const cellHeight = node.boundary.y1 - node.boundary.y0;
 
-  if (node.children.length === 0 || (cellWidth * cellHeight) / distSq < THETA * THETA) {
+  if (node.children.length === 0 || Math.hypot(cellWidth, cellHeight) / Math.sqrt(distSq) < THETA) {
     // Treat entire node as one mass
     const invDist3 = 1 / (distSq * Math.sqrt(distSq));
     const force = G * mass * invDist3;
@@ -191,19 +191,15 @@ export function step(width, height) {
     p.y += p.vy * dt;
 
     if (p.x < 0) {
-      p.x = 0;
-      p.vx = -p.vx;
+      p.x = width + p.x;
     } else if (p.x > width) {
-      p.x = width;
-      p.vx = -p.vx;
+      p.x = p.x - width;
     }
 
     if (p.y < 0) {
-      p.y = 0;
-      p.vy = -p.vy;
+      p.y = height + p.y;
     } else if (p.y > height) {
-      p.y = height;
-      p.vy = -p.vy;
+      p.y = p.y - height;
     }
   }
 

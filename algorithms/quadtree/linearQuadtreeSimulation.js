@@ -2,9 +2,9 @@ import { LinearQuadtree } from "./linearQuadtree.js";
 
 // ===== TUNABLE CONSTANTS ======================================================
 const N = 600; // Number of particles
-const G = 20.0; // grav. constant in screen units
+const G = 100.0; // grav. constant in screen units
 const THETA = 0.45; // Barnes–Hut opening angle (smaller = better ≈ slower)
-const EPS = 8; // Plummer softening (px) – prevents ejections
+const EPS = 3; // Plummer softening (px) – prevents ejections
 const PARTICLE_MASS = 1.0; // mass of every star (can vary, but unnecessary here)
 const SPLIT_PROB = 0.55; // P(split) at each recursion level when making the fractal
 const MAX_DEPTH = 4; // deeper → snowflakier clusters, ≈ 2^depth cells
@@ -31,17 +31,14 @@ export const forceOn = (tree, cellIndex, pIndex) => {
   const mass = tree.mass[cellIndex];
 
   // if mass is zero or node represents the particle itself, return zero force
-  if (mass === 0 || (node.count === 1 && node.start === pIndex)) return [0, 0];
+  if (mass === 0 || (node.count === 1 && tree._entries[node.start].index === pIndex)) return [0, 0];
 
   const dx = comX - x[pIndex];
   const dy = comY - y[pIndex];
   const distSq = dx * dx + dy * dy + EPS * EPS;
+  const cellSize = tree.size / (1 << node.level);
 
-  // Width of node
-  const cellWidth = tree.width / (1 << node.level);
-  const cellHeight = tree.height / (1 << node.level);
-
-  if (node.level === tree.maxDepth || (cellWidth * cellHeight) / distSq < THETA * THETA) {
+  if (node.level === tree.maxDepth || cellSize / Math.sqrt(distSq) < THETA) {
     // Treat entire node as one mass
     const invDist3 = 1 / (distSq * Math.sqrt(distSq));
     const force = G * mass * invDist3;
@@ -158,7 +155,7 @@ export function step(width, height) {
   }
 
   // Update forces
-  const tree = new LinearQuadtree({ xCoords: x, yCoords: y }, MAX_DEPTH);
+  const tree = new LinearQuadtree({ xCoords: x, yCoords: y, size: width }, MAX_DEPTH);
   for (let i = 0; i < N; ++i) {
     const [fx, fy] = forceOn(tree, tree.root, i);
     ax[i] = fx / PARTICLE_MASS;

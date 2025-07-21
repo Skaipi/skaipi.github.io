@@ -1,4 +1,4 @@
-import { deinterleave, morton32DecodeInt } from "./linearQuadtree.js";
+import { deinterleave, morton16DecodeInt } from "./linearQuadtree.js";
 
 export class Painter {
   constructor(context, config = {}) {
@@ -69,15 +69,25 @@ export class Painter {
     this.ctx.strokeStyle = this.VORONOI_EDGE_COLOR;
     this.ctx.lineWidth = 1;
 
-    for (let i = 0; i < tree.cells.length; i++) {
-      const cell = tree.cells[i];
+    const drawNode = (cellIdx, x0, y0) => {
+      console.log(cellIdx);
+      const cell = tree.cells[cellIdx];
+      console.log(cell);
 
-      if (cell.count === 0) continue;
+      if (!cell || cell.children.length === 0) return;
+      const cellSize = tree.size >>> cell.level;
 
       this.ctx.beginPath();
-      this.ctx.rect(x0, y0, cellWidth, cellHeight);
+      this.ctx.rect(x0, y0, cellSize, cellSize);
       this.ctx.stroke();
       this.ctx.closePath();
-    }
+
+      drawNode(cell.children[0], x0, y0);
+      drawNode(cell.children[1], x0 + cellSize, y0);
+      drawNode(cell.children[2], x0, y0 + cellSize);
+      drawNode(cell.children[3], x0 + cellSize, y0 + cellSize);
+    };
+
+    drawNode(tree.root, 0, 0);
   }
 }

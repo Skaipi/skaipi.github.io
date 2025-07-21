@@ -1,26 +1,3 @@
-class ZCurvePoint {
-  constructor(point) {
-    Object.assign(this, point); // Copy all properties
-    this.zIndex = this.getZCurveIndex(point.x, point.y);
-  }
-
-  // Spread bits of 16 bit integer to every second bit of a 32 bit integer
-  spreadBits(number) {
-    number &= 0xffff; // Ensure number is 16 bits
-    number = (number | (number << 8)) & 0x00ff00ff; // 8-bit gaps
-    number = (number | (number << 4)) & 0x0f0f0f0f; // 4-bit gaps
-    number = (number | (number << 2)) & 0x33333333; // 2-bit gaps
-    number = (number | (number << 1)) & 0x55555555; // 1-bit gaps
-    return number;
-  }
-
-  getZCurveIndex() {
-    const xBits = this.spreadBits(this.x);
-    const yBits = this.spreadBits(this.y);
-    return (yBits << 1) | xBits;
-  }
-}
-
 class QuadNode {
   constructor(boundary, capacity = 1) {
     this.boundary = boundary;
@@ -98,8 +75,6 @@ export class Quadtree {
       capacity,
     );
 
-    // const zPoints = points.map(point => new ZCurvePoint(point));
-    // zPoints.sort((a, b) => a.zIndex - b.zIndex);
     points.forEach((zIndex) => {
       this.root.insert(zIndex);
     });

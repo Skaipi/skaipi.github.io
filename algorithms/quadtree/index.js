@@ -6,6 +6,11 @@ import { generateHierarchicalCluster, getState, step } from "./simulation.js";
 // import { generateHierarchicalCluster, getState, step } from "./linearQuadtreeSimulation.js";
 
 const DEBAUNCE_TIME = 0;
+const TREE_TYPES = {
+  REGULAR: "regular",
+  LINEAR: "linear",
+};
+const treeType = TREE_TYPES.REGULAR;
 
 const resizeCanvas = () => {
   const header = document.getElementsByTagName("header")[0];
@@ -20,8 +25,10 @@ class InteractiveClient {
   constructor(canvas) {
     this.context = canvas.getContext("2d");
     this.painter = new Painter(this.context);
-    this.sites = generateHierarchicalCluster(this.width, this.height);
-    // canvas.onmousemove = this.onMouseMove.bind(this);
+    this.sites =
+      treeType === TREE_TYPES.REGULAR
+        ? generateHierarchicalCluster(this.width, this.height)
+        : generateHierarchicalCluster(this.size, this.size);
 
     this.showGrid = true;
     canvas.addEventListener("click", (e) => {
@@ -36,16 +43,25 @@ class InteractiveClient {
     return this.context.canvas.height;
   }
 
+  get size() {
+    const widthBits = Math.floor(Math.log2(this.width));
+    const heightBits = Math.floor(Math.log2(this.height));
+    const sizeBits = Math.min(widthBits, heightBits);
+    return 1 << sizeBits;
+  }
+
   draw() {
-    const quadtree = step(this.width, this.height);
+    const quadtree = treeType === TREE_TYPES.REGULAR ? step(this.width, this.height) : step(this.size, this.size);
     const sites = getState();
 
     this.painter.drawBackground();
-    this.painter.drawSites(sites);
-    // this.painter.drawLinearSites(sites);
+
+    if (treeType === TREE_TYPES.REGULAR) this.painter.drawSites(sites);
+    else this.painter.drawLinearSites(sites);
+
     if (this.showGrid) {
-      this.painter.drawTree(quadtree);
-      // this.painter.drawLinearTree(quadtree);
+      if (treeType === TREE_TYPES.REGULAR) this.painter.drawTree(quadtree);
+      else this.painter.drawLinearTree(quadtree);
     }
     requestAnimationFrame(this.draw.bind(this));
   }
