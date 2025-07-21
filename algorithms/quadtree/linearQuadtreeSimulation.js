@@ -41,10 +41,7 @@ export const forceOn = (tree, cellIndex, pIndex) => {
   const cellWidth = tree.width / (1 << node.level);
   const cellHeight = tree.height / (1 << node.level);
 
-  if (
-    node.level === tree.maxDepth ||
-    (cellWidth * cellHeight) / distSq < THETA * THETA
-  ) {
+  if (node.level === tree.maxDepth || (cellWidth * cellHeight) / distSq < THETA * THETA) {
     // Treat entire node as one mass
     const invDist3 = 1 / (distSq * Math.sqrt(distSq));
     const force = G * mass * invDist3;

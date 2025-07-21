@@ -33,9 +33,7 @@ export class Voronoi {
     while (!this.queue.isEmpty()) {
       const blEvent = this.queue.dequeue();
       this.sweepLine = blEvent.point.y;
-      blEvent.isSite
-        ? this.processSiteEvt(blEvent)
-        : this.processVertexEvt(blEvent);
+      blEvent.isSite ? this.processSiteEvt(blEvent) : this.processVertexEvt(blEvent);
     }
 
     const dirtyEdges = this.beachLine.getEdges();
@@ -64,9 +62,7 @@ export class Voronoi {
       root.left = new Parabola(this, root.focus);
       root.right = new Parabola(this, site);
       const newEdge =
-        site.x > root.focus.x
-          ? new Edge(this, middle, root.focus, site)
-          : new Edge(this, middle, site, root.focus);
+        site.x > root.focus.x ? new Edge(this, middle, root.focus, site) : new Edge(this, middle, site, root.focus);
       this.beachLine.replace(root, newEdge);
       this.edges.push(newEdge);
       return;
@@ -128,10 +124,7 @@ export class Voronoi {
     }
 
     // intersection point of par0 and par2
-    const intersectionPoint = new Point(
-      event.point.x,
-      par1.getY(event.point.x),
-    );
+    const intersectionPoint = new Point(event.point.x, par1.getY(event.point.x));
     pred.end = intersectionPoint;
     succ.end = intersectionPoint;
 
@@ -169,10 +162,7 @@ export class Voronoi {
     // Check if sweep line lies on circumference
     if (intersection.y - d >= this.sweepLine) return;
 
-    const event = new BeachlineEvent(
-      new Point(intersection.x, intersection.y - d),
-      false,
-    );
+    const event = new BeachlineEvent(new Point(intersection.x, intersection.y - d), false);
 
     parabola.circleEvent = event;
     event.arch = parabola;

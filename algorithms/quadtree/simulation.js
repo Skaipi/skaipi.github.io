@@ -34,12 +34,7 @@ export const forceOn = (node, particle) => {
   const { mass, comX, comY } = accumulate(node);
 
   // if mass is zero or node represents the particle itself, return zero force
-  if (
-    mass === 0 ||
-    (node.points.length === 1 &&
-      node.points[0].x === particle.x &&
-      node.points[0].y === particle.y)
-  )
+  if (mass === 0 || (node.points.length === 1 && node.points[0].x === particle.x && node.points[0].y === particle.y))
     return [0, 0];
 
   const dx = comX - particle.x;
@@ -50,10 +45,7 @@ export const forceOn = (node, particle) => {
   const cellWidth = node.boundary.x1 - node.boundary.x0;
   const cellHeight = node.boundary.y1 - node.boundary.y0;
 
-  if (
-    node.children.length === 0 ||
-    (cellWidth * cellHeight) / distSq < THETA * THETA
-  ) {
+  if (node.children.length === 0 || (cellWidth * cellHeight) / distSq < THETA * THETA) {
     // Treat entire node as one mass
     const invDist3 = 1 / (distSq * Math.sqrt(distSq));
     const force = G * mass * invDist3;

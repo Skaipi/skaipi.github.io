@@ -53,10 +53,7 @@ class InteractiveClient {
   static mouseX = (e) => e.clientX - e.target.offsetLeft;
   static mouseY = (e) => e.clientY - e.target.offsetTop;
   onMouseMove(e) {
-    const requestDraw =
-      DEBAUNCE_TIME > 16
-        ? throttle(this.draw.bind(this), DEBAUNCE_TIME)
-        : this.draw.bind(this);
+    const requestDraw = DEBAUNCE_TIME > 16 ? throttle(this.draw.bind(this), DEBAUNCE_TIME) : this.draw.bind(this);
     const last = this.sites[this.sites.length - 1];
     last.x = InteractiveClient.mouseX(e);
     last.y = InteractiveClient.mouseY(e);

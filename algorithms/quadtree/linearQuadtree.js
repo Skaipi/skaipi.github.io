@@ -17,10 +17,7 @@ for (let i = 0; i < 256; ++i) {
 }
 
 const morton32EncodeInt = (x, y) =>
-  ((LookupTable[y >>> 8] << 17) |
-    (LookupTable[x >>> 8] << 16) |
-    (LookupTable[y & 255] << 1) |
-    LookupTable[x & 255]) >>>
+  ((LookupTable[y >>> 8] << 17) | (LookupTable[x >>> 8] << 16) | (LookupTable[y & 255] << 1) | LookupTable[x & 255]) >>>
   0; // Ensure unsigned value
 
 export const deinterleave = (v) => UnlookupTable[v & 0x5555];
@@ -61,10 +58,8 @@ export class LinearQuadtree {
     this.mostSignificantBit = Math.max(this.widthBits, this.heightBits) * 2;
 
     // Encode cells
-    this.sx =
-      this.maxX === this.minX ? 0 : this.widthRange / (this.maxX - this.minX);
-    this.sy =
-      this.maxY === this.minY ? 0 : this.heightRange / (this.maxY - this.minY);
+    this.sx = this.maxX === this.minX ? 0 : this.widthRange / (this.maxX - this.minX);
+    this.sy = this.maxY === this.minY ? 0 : this.heightRange / (this.maxY - this.minY);
     for (let i = 0; i < xCoords.length; ++i) {
       const gx = Math.floor((xCoords[i] - this.minX) * this.sx);
       const gy = Math.floor((yCoords[i] - this.minY) * this.sy);
@@ -83,13 +78,7 @@ export class LinearQuadtree {
     const thisShift = (this.maxDepth - level) * 2;
     const nextShift = (this.maxDepth - level - 1) * 2;
     const keyPrefix = entry.key >>> thisShift;
-    const cell = new LinearQuadtreeNode(
-      keyPrefix,
-      entry.key,
-      level,
-      start,
-      end,
-    );
+    const cell = new LinearQuadtreeNode(keyPrefix, entry.key, level, start, end);
     const cellIndex = this.cells.push(cell) - 1;
 
     let nodeMass = POINT_MASS;
@@ -125,11 +114,7 @@ export class LinearQuadtree {
     nodeY /= end - start;
 
     for (let c = 0; c <= child; ++c) {
-      const childIdx = this.buildTree(
-        childStarts[c],
-        childStarts[c + 1],
-        level + 1,
-      );
+      const childIdx = this.buildTree(childStarts[c], childStarts[c + 1], level + 1);
       cell.children.push(childIdx);
     }
 
@@ -148,10 +133,8 @@ export class LinearQuadtree {
   decodeCell(code) {
     const { x: xi, y: yi } = morton32DecodeInt(code);
 
-    const invX =
-      this.maxX === this.minX ? 0 : (this.maxX - this.minX) / this.widthRange;
-    const invY =
-      this.maxY === this.minY ? 0 : (this.maxY - this.minY) / this.heightRange;
+    const invX = this.maxX === this.minX ? 0 : (this.maxX - this.minX) / this.widthRange;
+    const invY = this.maxY === this.minY ? 0 : (this.maxY - this.minY) / this.heightRange;
 
     return {
       x: this.minX + xi * invX,

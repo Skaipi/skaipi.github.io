@@ -32,11 +32,7 @@ export class Painter {
     for (let i = 0; i < sites.length; i++) {
       const site = sites[i];
 
-      if (
-        selectedSite === null ||
-        isTheSamePoint(site, selectedSite) ||
-        isNeighbour(site, selectedSite)
-      )
+      if (selectedSite === null || isTheSamePoint(site, selectedSite) || isNeighbour(site, selectedSite))
         this.ctx.globalAlpha = 1;
       else this.ctx.globalAlpha = 0.1;
 
@@ -63,11 +59,7 @@ export class Painter {
     for (let i = 0; i < sites.length; i++) {
       const site = sites[i];
 
-      if (
-        selectedSite === null ||
-        (site.x === selectedSite?.x && site.y === selectedSite?.y)
-      )
-        this.ctx.globalAlpha = 1;
+      if (selectedSite === null || (site.x === selectedSite?.x && site.y === selectedSite?.y)) this.ctx.globalAlpha = 1;
       else this.ctx.globalAlpha = 0.1;
 
       for (let j = 0; j < site.neighbours.length; j++) {

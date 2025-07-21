@@ -1,5 +1,4 @@
-const distance = (p1, p2) =>
-  Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2);
+const distance = (p1, p2) => Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2);
 
 export class Graph {
   constructor(points, createLocally = false) {
@@ -18,12 +17,7 @@ export class Graph {
       if (createLocally) candidates = candidates.slice(0, 10); // keep only the first 10 candidates
 
       candidates.forEach((candidate) => {
-        if (
-          selectedNeighbours.every(
-            (neighbour) =>
-              distance(neighbour, candidate) >= candidate.distance - 0.001,
-          )
-        ) {
+        if (selectedNeighbours.every((neighbour) => distance(neighbour, candidate) >= candidate.distance - 0.001)) {
           selectedNeighbours.push(candidate);
         }
       });
