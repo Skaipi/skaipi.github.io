@@ -3,6 +3,7 @@ import { Painter } from "./drawing.js";
 import { betaSkeleton } from "./betaGraph.js";
 import { relativeNeighborGraph } from "./rngGraph.js";
 import { nnGrapg } from "./nnGraph.js";
+import { KNNSlider } from "./knnSlider.js";
 
 const CONTROLLS_WIDTH = 250;
 const DEBAUNCE_TIME = 0;
@@ -40,8 +41,13 @@ class InteractiveClient {
     this.canvas.height = this.canvas.clientHeight;
   }
 
-  updatePoints(betaValue) {
+  updateBeta(betaValue) {
     this.graph = betaSkeleton(this.sites, betaValue);
+  }
+
+  updateKnn(k) {
+    console.log(k);
+    this.graph = nnGrapg(this.sites, k);
   }
 
   updateConnections() {
@@ -55,18 +61,19 @@ class InteractiveClient {
   }
 
   changeGraph(id) {
+    this.slider?.destroy();
+
     if (id === "bs") {
       // TODO: remember previous beta value
       this.graph = betaSkeleton(this.sites, 1);
       this.slider = new BetaSlider();
-    } else {
-      this.slider?.destroy();
     }
 
     if (id === "rng") {
       this.graph = relativeNeighborGraph(this.sites);
     } else if (id === "nn") {
       this.graph = nnGrapg(this.sites);
+      this.slider = new KNNSlider();
     }
 
     this.draw();
@@ -105,7 +112,7 @@ window.addEventListener("load", () => {
     interactiveClient.changeGraph("bs");
 
     document.querySelector('input[name="beta"]').addEventListener("change", (e) => {
-      interactiveClient.updatePoints(Number(e.target.value));
+      interactiveClient.updateBeta(Number(e.target.value));
       interactiveClient.draw();
     });
   });
@@ -116,11 +123,11 @@ window.addEventListener("load", () => {
 
   document.getElementById("nn").addEventListener("change", (e) => {
     interactiveClient.changeGraph("nn");
-  });
 
-  document.querySelector(".recompute-btn").addEventListener("click", (e) => {
-    interactiveClient.updatePoints();
-    interactiveClient.draw();
+    document.querySelector('input[name="knn"]').addEventListener("change", (e) => {
+      interactiveClient.updateKnn(Number(e.target.value));
+      interactiveClient.draw();
+    });
   });
 
   // Activate default graph

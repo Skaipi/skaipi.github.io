@@ -1,16 +1,16 @@
-export class BetaSlider {
+export class KNNSlider {
   constructor(config) {
-    this.id = "betaSlider";
-    this.min = 0;
-    this.max = 2;
-    this.step = 0.1;
-    this.value = config?.value ?? 1;
+    this.id = "knnSlider";
+    this.min = 1;
+    this.max = 10;
+    this.step = 1;
+    this.value = config?.value ?? 5;
 
     this.render();
   }
 
   updateLabel() {
-    this.labelEl.textContent = `Beta: ${this.value}`;
+    this.labelEl.textContent = `K: ${this.value}`;
   }
 
   render() {
@@ -26,8 +26,8 @@ export class BetaSlider {
 
     this.inputEl = document.createElement("input");
     this.inputEl.type = "range";
-    this.inputEl.id = "beta";
-    this.inputEl.name = "beta";
+    this.inputEl.id = "knn";
+    this.inputEl.name = "knn";
     this.inputEl.min = this.min;
     this.inputEl.max = this.max;
     this.inputEl.step = this.step;
