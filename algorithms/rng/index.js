@@ -134,7 +134,6 @@ window.addEventListener("load", () => {
   const checkbox = document.querySelector("#searchGlobalConnections");
   checkbox.addEventListener("change", (e) => {
     interactiveClient.useLocalSearch = checkbox.checked;
-    console.log(e.target.value);
     interactiveClient.updateConnections();
     interactiveClient.draw();
   });
