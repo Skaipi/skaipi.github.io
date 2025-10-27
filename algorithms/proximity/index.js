@@ -7,6 +7,8 @@ import { KNNSlider } from "./knnSlider.js";
 
 const CONTROLLS_WIDTH = 250;
 const DEBAUNCE_TIME = 0;
+const DEFAULT_BETA = 1;
+const DEFAULT_KNN = 5;
 
 const getRandomPoints = (amount, width, height) => {
   const points = [];
@@ -26,7 +28,9 @@ class InteractiveClient {
     this.graph = betaSkeleton(this.sites, 2);
     this.selectedSite = null;
 
-    // canvas.onmousemove = this.onMouseMove.bind(this);
+    this.prevBeta = DEFAULT_BETA;
+    this.prevKnn = DEFAULT_KNN;
+    canvas.onmousemove = this.onMouseMove.bind(this);
   }
 
   get width() {
@@ -43,11 +47,12 @@ class InteractiveClient {
 
   updateBeta(betaValue) {
     this.graph = betaSkeleton(this.sites, betaValue);
+    this.prevBeta = betaValue;
   }
 
   updateKnn(k) {
-    console.log(k);
     this.graph = nnGrapg(this.sites, k);
+    this.prevKnn = k;
   }
 
   updateConnections() {
@@ -56,24 +61,21 @@ class InteractiveClient {
 
   draw() {
     this.painter.drawBackground();
-    this.painter.drawEdges(this.graph.edges, this.graph.nodes);
-    this.painter.drawSites(this.graph.nodes);
+    this.painter.drawEdges(this.graph.edges, this.graph.nodes, this.selectedSite);
+    this.painter.drawSites(this.graph.nodes, this.selectedSite);
   }
 
   changeGraph(id) {
     this.slider?.destroy();
 
     if (id === "bs") {
-      // TODO: remember previous beta value
-      this.graph = betaSkeleton(this.sites, 1);
-      this.slider = new BetaSlider();
-    }
-
-    if (id === "rng") {
+      this.graph = betaSkeleton(this.sites, this.prevBeta);
+      this.slider = new BetaSlider({ value: this.prevBeta });
+    } else if (id === "rng") {
       this.graph = relativeNeighborGraph(this.sites);
     } else if (id === "nn") {
-      this.graph = nnGrapg(this.sites);
-      this.slider = new KNNSlider();
+      this.graph = nnGrapg(this.sites, this.prevKnn);
+      this.slider = new KNNSlider({ value: this.prevKnn });
     }
 
     this.draw();
@@ -86,15 +88,17 @@ class InteractiveClient {
     const mouseX = InteractiveClient.mouseX(e);
     const mouseY = InteractiveClient.mouseY(e);
     let found = false;
-    this.graph.items.forEach((site) => {
-      if (Math.pow(site.x - mouseX, 2) + Math.pow(site.y - mouseY, 2) < 64) {
-        this.selectedSite = site;
+    const r2 = 64;
+
+    for (let i = 0; i < this.sites.length; i++) {
+      const [x, y] = this.sites[i];
+      if (Math.pow(x - mouseX, 2) + Math.pow(y - mouseY, 2) < r2) {
+        this.selectedSite = i;
         found = true;
       }
-    });
-    if (!found) {
-      this.selectedSite = null;
     }
+
+    if (!found) this.selectedSite = null;
     requestDraw();
   }
 }
