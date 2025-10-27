@@ -1,3 +1,4 @@
+// TODO: This should be binary heap
 export class PriorityQueue {
   Element = class Element {
     constructor(element, priority) {

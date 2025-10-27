@@ -70,9 +70,7 @@ export class Painter {
     this.ctx.lineWidth = 1;
 
     const drawNode = (cellIdx, x0, y0) => {
-      console.log(cellIdx);
       const cell = tree.cells[cellIdx];
-      console.log(cell);
 
       if (!cell || cell.children.length === 0) return;
       const cellSize = tree.size >>> cell.level;

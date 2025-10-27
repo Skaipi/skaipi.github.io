@@ -1,0 +1,35 @@
+---
+custom_css: /algorithms/proximity/index.css
+title: Proximity Graphs
+layout: default
+---
+<div class="canvas-wrapper">
+  <canvas id="canvas"></canvas>
+
+  <div id="controls-panel">
+    <h2>Controls</h2>
+
+    <div class="mode-container">
+      <label>
+        <input id="bs" type="radio" name="mode" value="bs" checked>
+        Beta Skeleton
+      </label>
+      
+      <label>
+        <input id="rng" type="radio" name="mode" value="rng">
+        Relative Neighborhood
+      </label>
+
+      <label>
+        <input id="nn" type="radio" name="mode" value="nn">
+        Nearest Neighbors
+      </label>
+    </div>
+
+    <hr/>
+
+    <div class="range-input">
+    </div>
+  </div>
+</div>
+<script src="./index.js" type="module" defer></script>
