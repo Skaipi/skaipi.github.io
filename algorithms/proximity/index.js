@@ -81,7 +81,6 @@ class InteractiveClient {
   }
 
   changeGraph(id) {
-    console.log(this.sliders);
     while (this.sliders.length) {
       const sl = this.sliders.pop();
       sl?.destroy();
