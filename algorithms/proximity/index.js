@@ -2,13 +2,16 @@ import { BetaSlider } from "./betaSlider.js";
 import { Painter } from "./drawing.js";
 import { betaSkeleton } from "./betaGraph.js";
 import { relativeNeighborGraph } from "./rngGraph.js";
-import { nnGrapg } from "./nnGraph.js";
+import { nnGraph, rknnGraph } from "./nnGraph.js";
 import { KNNSlider } from "./knnSlider.js";
+import { RankSlider } from "./rankSlider.js";
 
 const CONTROLLS_WIDTH = 250;
 const DEBAUNCE_TIME = 0;
+const DEFAULT_GRAPH = "bs";
 const DEFAULT_BETA = 1;
 const DEFAULT_KNN = 5;
+const DEFAULT_RANK_THRESHOLD = 1;
 
 const getRandomPoints = (amount, width, height) => {
   const points = [];
@@ -26,10 +29,13 @@ class InteractiveClient {
     this.painter = new Painter(this.context);
     this.sites = getRandomPoints(100, this.width, this.height);
     this.graph = betaSkeleton(this.sites, 2);
+    this.sliders = [];
     this.selectedSite = null;
 
+    this.prevGraph = DEFAULT_GRAPH;
     this.prevBeta = DEFAULT_BETA;
     this.prevKnn = DEFAULT_KNN;
+    this.prevRankThreshold = DEFAULT_RANK_THRESHOLD;
     canvas.onmousemove = this.onMouseMove.bind(this);
   }
 
@@ -51,8 +57,17 @@ class InteractiveClient {
   }
 
   updateKnn(k) {
-    this.graph = nnGrapg(this.sites, k);
+    if (this.prevGraph === "nn") {
+      this.graph = nnGraph(this.sites, k);
+    } else if (this.prevGraph === "rknn") {
+      this.graph = rknnGraph(this.sites, k, this.prevRankThreshold);
+    }
     this.prevKnn = k;
+  }
+
+  updateRankThreshold(t) {
+    this.graph = rknnGraph(this.sites, this.prevKnn, t);
+    this.prevRankThreshold = t;
   }
 
   updateConnections() {
@@ -66,18 +81,27 @@ class InteractiveClient {
   }
 
   changeGraph(id) {
-    this.slider?.destroy();
+    console.log(this.sliders);
+    while (this.sliders.length) {
+      const sl = this.sliders.pop();
+      sl?.destroy();
+    }
 
     if (id === "bs") {
       this.graph = betaSkeleton(this.sites, this.prevBeta);
-      this.slider = new BetaSlider({ value: this.prevBeta });
+      this.sliders.push(new BetaSlider({ value: this.prevBeta }));
     } else if (id === "rng") {
       this.graph = relativeNeighborGraph(this.sites);
     } else if (id === "nn") {
-      this.graph = nnGrapg(this.sites, this.prevKnn);
-      this.slider = new KNNSlider({ value: this.prevKnn });
+      this.graph = nnGraph(this.sites, this.prevKnn);
+      this.sliders.push(new KNNSlider({ value: this.prevKnn }));
+    } else if (id === "rknn") {
+      this.graph = rknnGraph(this.sites, this.prevKnn, this.prevRankThreshold);
+      this.sliders.push(new KNNSlider({ value: this.prevKnn }));
+      this.sliders.push(new RankSlider({ value: this.prevRankThreshold }));
     }
 
+    this.prevGraph = id;
     this.draw();
   }
 
@@ -134,6 +158,20 @@ window.addEventListener("load", () => {
     });
   });
 
+  document.getElementById("rknn").addEventListener("change", (e) => {
+    interactiveClient.changeGraph("rknn");
+
+    document.querySelector('input[name="knn"]').addEventListener("change", (e) => {
+      interactiveClient.updateKnn(Number(e.target.value));
+      interactiveClient.draw();
+    });
+
+    document.querySelector('input[name="rankThreshold"]').addEventListener("change", (e) => {
+      interactiveClient.updateRankThreshold(Number(e.target.value));
+      interactiveClient.draw();
+    });
+  });
+
   // Activate default graph
-  document.getElementById("bs").dispatchEvent(new Event("change"));
+  document.getElementById(DEFAULT_GRAPH).dispatchEvent(new Event("change"));
 });
