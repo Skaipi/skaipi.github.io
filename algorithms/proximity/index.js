@@ -258,6 +258,10 @@ window.addEventListener("load", () => {
     }
   });
 
+  dropZoneEl.addEventListener("dragover", (e) => {
+    e.preventDefault();
+  });
+
   dropZoneEl.addEventListener("drop", (e) => {
     e.preventDefault();
 
