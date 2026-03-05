@@ -5,6 +5,7 @@ import { relativeNeighborGraph } from "./rngGraph.js";
 import { nnGraph, rknnGraph } from "./nnGraph.js";
 import { KNNSlider } from "./knnSlider.js";
 import { RankSlider } from "./rankSlider.js";
+import { CSVHandler } from "./csvHandler.js";
 
 const CONTROLLS_WIDTH = 250;
 const DEBAUNCE_TIME = 0;
@@ -32,10 +33,10 @@ class InteractiveClient {
     this.sliders = [];
     this.selectedSite = null;
 
-    this.prevGraph = DEFAULT_GRAPH;
-    this.prevBeta = DEFAULT_BETA;
-    this.prevKnn = DEFAULT_KNN;
-    this.prevRankThreshold = DEFAULT_RANK_THRESHOLD;
+    this.graphId = DEFAULT_GRAPH;
+    this.beta = DEFAULT_BETA;
+    this.knn = DEFAULT_KNN;
+    this.rankThreshold = DEFAULT_RANK_THRESHOLD;
     canvas.onmousemove = this.onMouseMove.bind(this);
   }
 
@@ -51,33 +52,43 @@ class InteractiveClient {
     this.canvas.height = this.canvas.clientHeight;
   }
 
+  updatePoints(points) {
+    this.sites = this.rescalePoints(points);
+    this.updateGraph();
+  }
+
   updateBeta(betaValue) {
-    this.graph = betaSkeleton(this.sites, betaValue);
-    this.prevBeta = betaValue;
+    this.beta = betaValue;
+    this.updateGraph();
   }
 
   updateKnn(k) {
-    if (this.prevGraph === "nn") {
-      this.graph = nnGraph(this.sites, k);
-    } else if (this.prevGraph === "rknn") {
-      this.graph = rknnGraph(this.sites, k, this.prevRankThreshold);
-    }
-    this.prevKnn = k;
+    this.knn = k;
+    this.updateGraph();
   }
 
   updateRankThreshold(t) {
-    this.graph = rknnGraph(this.sites, this.prevKnn, t);
-    this.prevRankThreshold = t;
-  }
-
-  updateConnections() {
-    this.graph = betaSkeleton(this.sites, 2);
+    this.rankThreshold = t;
+    this.updateGraph();
   }
 
   draw() {
     this.painter.drawBackground();
     this.painter.drawEdges(this.graph.edges, this.graph.nodes, this.selectedSite);
     this.painter.drawSites(this.graph.nodes, this.selectedSite);
+  }
+
+  updateGraph() {
+    if (this.graphId === "bs") {
+      this.graph = betaSkeleton(this.sites, this.beta);
+    } else if (this.graphId === "rng") {
+      this.graph = relativeNeighborGraph(this.sites);
+    } else if (this.graphId === "nn") {
+      this.graph = nnGraph(this.sites, this.knn);
+    } else if (this.graphId === "rknn") {
+      this.graph = rknnGraph(this.sites, this.knn, this.rankThreshold);
+    }
+    this.draw();
   }
 
   changeGraph(id) {
@@ -87,20 +98,20 @@ class InteractiveClient {
     }
 
     if (id === "bs") {
-      this.graph = betaSkeleton(this.sites, this.prevBeta);
-      this.sliders.push(new BetaSlider({ value: this.prevBeta }));
+      this.graph = betaSkeleton(this.sites, this.beta);
+      this.sliders.push(new BetaSlider({ value: this.beta }));
     } else if (id === "rng") {
       this.graph = relativeNeighborGraph(this.sites);
     } else if (id === "nn") {
-      this.graph = nnGraph(this.sites, this.prevKnn);
-      this.sliders.push(new KNNSlider({ value: this.prevKnn }));
+      this.graph = nnGraph(this.sites, this.knn);
+      this.sliders.push(new KNNSlider({ value: this.knn }));
     } else if (id === "rknn") {
-      this.graph = rknnGraph(this.sites, this.prevKnn, this.prevRankThreshold);
-      this.sliders.push(new KNNSlider({ value: this.prevKnn }));
-      this.sliders.push(new RankSlider({ value: this.prevRankThreshold }));
+      this.graph = rknnGraph(this.sites, this.knn, this.rankThreshold);
+      this.sliders.push(new KNNSlider({ value: this.knn }));
+      this.sliders.push(new RankSlider({ value: this.rankThreshold }));
     }
 
-    this.prevGraph = id;
+    this.graphId = id;
     this.draw();
   }
 
@@ -124,6 +135,72 @@ class InteractiveClient {
     if (!found) this.selectedSite = null;
     requestDraw();
   }
+
+  rescalePoints(points, opts = {}) {
+    const { mode = "contain", flipY = true } = opts;
+    if (!Array.isArray(points) || points.length === 0) return [];
+
+    let xMin = Infinity,
+      xMax = -Infinity,
+      yMin = Infinity,
+      yMax = -Infinity;
+    for (const p of points) {
+      const x = p[0],
+        y = p[1];
+      if (x < xMin) xMin = x;
+      if (x > xMax) xMax = x;
+      if (y < yMin) yMin = y;
+      if (y > yMax) yMax = y;
+    }
+
+    const dataW = xMax - xMin;
+    const dataH = yMax - yMin;
+
+    const x0 = 0;
+    const x1 = this.width;
+    const y0raw = 0;
+    const y1raw = this.height;
+    const vxMin = Math.min(x0, x1),
+      vxMax = Math.max(x0, x1);
+    const vyMin = Math.min(y0raw, y1raw),
+      vyMax = Math.max(y0raw, y1raw);
+
+    const viewW = vxMax - vxMin;
+    const viewH = vyMax - vyMin;
+
+    // Degenerate cases: all points share x and/or y
+    if (dataW === 0 && dataH === 0) {
+      const cx = vxMin + viewW / 2;
+      const cy = vyMin + viewH / 2;
+      return points.map(() => [cx, flipY ? vyMin + vyMax - cy : cy]);
+    }
+
+    // If one dimension is degenerate, treat its scale as Infinity so the other dimension drives uniform scale.
+    const sx = dataW === 0 ? Infinity : viewW / dataW;
+    const sy = dataH === 0 ? Infinity : viewH / dataH;
+
+    const s = mode === "cover" ? Math.max(sx, sy) : Math.min(sx, sy);
+
+    // Size of scaled data bbox in viewport units
+    const scaledW = dataW === 0 ? 0 : dataW * s;
+    const scaledH = dataH === 0 ? 0 : dataH * s;
+
+    // Centering offsets to letterbox/pillarbox (or negative in cover mode due to cropping)
+    const ox = vxMin + (viewW - scaledW) / 2;
+    const oy = vyMin + (viewH - scaledH) / 2;
+
+    // Map point: translate to origin, uniform scale, then offset into viewport
+    const out = points.map(([x, y]) => {
+      const xn = dataW === 0 ? vxMin + viewW / 2 : ox + (x - xMin) * s;
+      const yn = dataH === 0 ? vyMin + viewH / 2 : oy + (y - yMin) * s;
+      return [xn, yn];
+    });
+
+    if (!flipY) return out;
+
+    // Flip within the yNew range
+    return out.map(([x, y]) => [x, vyMin + vyMax - y]);
+  }
 }
 
 window.addEventListener("load", () => {
@@ -134,6 +211,7 @@ window.addEventListener("load", () => {
   canvas.width = window.innerWidth - CONTROLLS_WIDTH;
   canvas.height = window.innerHeight - headerHeight;
   const interactiveClient = new InteractiveClient(canvas);
+  const csvHandler = new CSVHandler();
 
   document.getElementById("bs").addEventListener("change", (e) => {
     interactiveClient.changeGraph("bs");
@@ -153,7 +231,6 @@ window.addEventListener("load", () => {
 
     document.querySelector('input[name="knn"]').addEventListener("change", (e) => {
       interactiveClient.updateKnn(Number(e.target.value));
-      interactiveClient.draw();
     });
   });
 
@@ -162,13 +239,34 @@ window.addEventListener("load", () => {
 
     document.querySelector('input[name="knn"]').addEventListener("change", (e) => {
       interactiveClient.updateKnn(Number(e.target.value));
-      interactiveClient.draw();
     });
 
     document.querySelector('input[name="rankThreshold"]').addEventListener("change", (e) => {
       interactiveClient.updateRankThreshold(Number(e.target.value));
-      interactiveClient.draw();
     });
+  });
+
+  const inputEl = document.querySelector("input[name=csvFile]");
+  const dropZoneEl = document.querySelector(".drop-zone");
+  dropZoneEl.addEventListener("click", (e) => inputEl.click());
+
+  inputEl.addEventListener("change", (e) => {
+    if (inputEl.files.length) {
+      csvHandler.loadFile(e.dataTransfer.files[0]).then(({ points }) => {
+        interactiveClient.updatePoints(points);
+      });
+    }
+  });
+
+  dropZoneEl.addEventListener("drop", (e) => {
+    e.preventDefault();
+
+    if (e.dataTransfer.files.length) {
+      inputEl.files = e.dataTransfer.files;
+      csvHandler.loadFile(e.dataTransfer.files[0]).then(({ points }) => {
+        interactiveClient.updatePoints(points);
+      });
+    }
   });
 
   // Activate default graph
