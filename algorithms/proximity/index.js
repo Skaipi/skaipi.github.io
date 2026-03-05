@@ -6,6 +6,8 @@ import { nnGraph, rknnGraph } from "./nnGraph.js";
 import { KNNSlider } from "./knnSlider.js";
 import { RankSlider } from "./rankSlider.js";
 import { CSVHandler } from "./csvHandler.js";
+import { SizeSlider } from "./sizeSlider.js";
+import { WidthSlider } from "./widthSlider.js";
 
 const CONTROLLS_WIDTH = 250;
 const DEBAUNCE_TIME = 0;
@@ -29,8 +31,9 @@ class InteractiveClient {
     this.context = canvas.getContext("2d");
     this.painter = new Painter(this.context);
     this.sites = getRandomPoints(100, this.width, this.height);
+    this.painterSliders = [new SizeSlider(), new WidthSlider()];
     this.graph = betaSkeleton(this.sites, 2);
-    this.sliders = [];
+    this.graphSliders = [];
     this.selectedSite = null;
 
     this.graphId = DEFAULT_GRAPH;
@@ -50,6 +53,16 @@ class InteractiveClient {
   adjustCanvasSize() {
     this.canvas.width = this.canvas.clientWidth - CONTROLLS_WIDTH;
     this.canvas.height = this.canvas.clientHeight;
+  }
+
+  updatePointSize(size) {
+    this.painter.setSiteRadius(size);
+    this.draw();
+  }
+
+  updateEdgeWidth(width) {
+    this.painter.setEdgeWidth(width);
+    this.draw();
   }
 
   updatePoints(points) {
@@ -92,23 +105,23 @@ class InteractiveClient {
   }
 
   changeGraph(id) {
-    while (this.sliders.length) {
-      const sl = this.sliders.pop();
+    while (this.graphSliders.length) {
+      const sl = this.graphSliders.pop();
       sl?.destroy();
     }
 
     if (id === "bs") {
       this.graph = betaSkeleton(this.sites, this.beta);
-      this.sliders.push(new BetaSlider({ value: this.beta }));
+      this.graphSliders.push(new BetaSlider({ value: this.beta }));
     } else if (id === "rng") {
       this.graph = relativeNeighborGraph(this.sites);
     } else if (id === "nn") {
       this.graph = nnGraph(this.sites, this.knn);
-      this.sliders.push(new KNNSlider({ value: this.knn }));
+      this.graphSliders.push(new KNNSlider({ value: this.knn }));
     } else if (id === "rknn") {
       this.graph = rknnGraph(this.sites, this.knn, this.rankThreshold);
-      this.sliders.push(new KNNSlider({ value: this.knn }));
-      this.sliders.push(new RankSlider({ value: this.rankThreshold }));
+      this.graphSliders.push(new KNNSlider({ value: this.knn }));
+      this.graphSliders.push(new RankSlider({ value: this.rankThreshold }));
     }
 
     this.graphId = id;
@@ -244,6 +257,14 @@ window.addEventListener("load", () => {
     document.querySelector('input[name="rankThreshold"]').addEventListener("change", (e) => {
       interactiveClient.updateRankThreshold(Number(e.target.value));
     });
+  });
+
+  document.querySelector('input[name="pointSize"]').addEventListener("change", (e) => {
+    interactiveClient.updatePointSize(Number(e.target.value));
+  });
+
+  document.querySelector('input[name="edgeWidt"]').addEventListener("change", (e) => {
+    interactiveClient.updateEdgeWidth(Number(e.target.value));
   });
 
   const inputEl = document.querySelector("input[name=csvFile]");

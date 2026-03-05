@@ -9,6 +9,14 @@ export class Painter {
     this.EDGE_WIDTH = config.edgeWidth ?? 2;
   }
 
+  setSiteRadius(radius) {
+    this.SITE_RADIUS = radius;
+  }
+
+  setEdgeWidth(edgeWidth) {
+    this.EDGE_WIDTH = edgeWidth;
+  }
+
   drawBackground = () => {
     this.ctx.fillStyle = this.BACKGROUND_COLOR;
     this.ctx.fillRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
