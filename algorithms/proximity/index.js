@@ -28,7 +28,10 @@ const getRandomPoints = (amount, width, height) => {
 class Controller {
   constructor(svg) {
     this.renderer = new GraphRenderer(svg);
-    this.painterSliders = [new SizeSlider(), new WidthSlider()];
+    this.painterSliders = [
+      new SizeSlider({ value: DEFAULT_POINT_RADIUS }),
+      new WidthSlider({ value: DEFAULT_EDGE_WIDTH }),
+    ];
     this.graphSliders = [];
     this.sites = getRandomPoints(100, this.renderer.width, this.renderer.height);
 
