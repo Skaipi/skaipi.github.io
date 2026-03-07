@@ -1,7 +1,7 @@
 ---
 ---
 
-.canvas-wrapper {
+.viz-wrapper {
   display: flex;
   flex-flow: row nowrap;
 
@@ -17,6 +17,7 @@
 
 #controls-panel {
   width: 250px;
+  min-width: 250px;
   background-color: #0D1117;
   color: #E1E8ED;
   padding: 1rem;
