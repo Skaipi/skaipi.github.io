@@ -24,8 +24,9 @@ export class GraphRenderer {
   render(model, state) {
     const { graph } = model;
     const { width, height } = this.svgEl.getBoundingClientRect();
-    const { pointRadius, edgeWidth, selectedId, hitRadius = Math.max(pointRadius + 6, 10) } = state;
+    const { pointRadius, edgeWidth, selectedId } = state;
     const nodeById = new Map(graph.nodes.map((n) => [n.id, n]));
+    const hasSelectedId = selectedId !== null;
 
     this.svg.attr("width", width).attr("height", height);
 
@@ -33,22 +34,22 @@ export class GraphRenderer {
       .selectAll("line")
       .data(graph.edges, (d) => d.id)
       .join("line")
-      .attr("class", (d) => (d.source === selectedId || d.target === selectedId ? "edge edge--active" : "edge"))
       .attr("x1", (d) => nodeById.get(d.source).x)
       .attr("y1", (d) => nodeById.get(d.source).y)
       .attr("x2", (d) => nodeById.get(d.target).x)
       .attr("y2", (d) => nodeById.get(d.target).y)
       .attr("stroke", this.EDGE_COLOR)
+      .attr("opacity", (d) => (hasSelectedId && d.source !== selectedId && d.target !== selectedId ? "0.2" : "1"))
       .attr("stroke-width", edgeWidth);
 
     this.gNodes
       .selectAll("circle")
       .data(graph.nodes, (d) => d.id)
       .join("circle")
-      .attr("class", (d) => (d.id === selectedId ? "node node--active" : "node"))
       .attr("cx", (d) => d.x)
       .attr("cy", (d) => d.y)
       .attr("r", pointRadius)
+      .attr("opacity", (d) => (hasSelectedId && d.id !== selectedId ? "0.2" : "1"))
       .attr("fill", this.NODE_COLOR);
   }
 }

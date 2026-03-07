@@ -7,7 +7,7 @@ import { RankSlider } from "./controlls/rankSlider.js";
 import { CSVHandler } from "./csvHandler.js";
 import { SizeSlider } from "./controlls/sizeSlider.js";
 import { WidthSlider } from "./controlls/widthSlider.js";
-import { GraphRenderer } from "./renderer.js";
+import { GraphRenderer } from "./view/view.js";
 
 const DEBAUNCE_TIME = 0;
 const DEFAULT_GRAPH = "bs";
@@ -26,8 +26,9 @@ const getRandomPoints = (amount, width, height) => {
 };
 
 class Controller {
-  constructor(svg) {
-    this.renderer = new GraphRenderer(svg);
+  constructor(svgEl, globalTranslation) {
+    this.translate = globalTranslation;
+    this.renderer = new GraphRenderer(svgEl);
     this.painterSliders = [
       new SizeSlider({ value: DEFAULT_POINT_RADIUS }),
       new WidthSlider({ value: DEFAULT_EDGE_WIDTH }),
@@ -43,13 +44,17 @@ class Controller {
       pointRadius: DEFAULT_POINT_RADIUS,
       edgeWidth: DEFAULT_EDGE_WIDTH,
       rankThreshold: DEFAULT_RANK_THRESHOLD,
-      selectedSite: null,
+      selectedId: null,
     };
 
     this.state = new Proxy(this._state, {
       set: (target, key, value) => {
-        target[key] = value;
-        this.updateGraph();
+        const prevValue = target[key];
+
+        if (value !== prevValue) {
+          target[key] = value;
+          this.updateGraph();
+        }
         return true;
       },
     });
@@ -64,6 +69,8 @@ class Controller {
         return true;
       },
     });
+
+    svgEl.addEventListener("mousemove", this.onMouseMove.bind(this));
   }
 
   updatePoints(points) {
@@ -130,25 +137,30 @@ class Controller {
     this.renderer.render(this.model, this.state);
   }
 
-  static mouseX = (e) => e.clientX - e.target.offsetLeft;
-  static mouseY = (e) => e.clientY - e.target.offsetTop;
+  mouseX(e) {
+    return e.clientX - this.translate.x;
+  }
+
+  mouseY(e) {
+    return e.clientY - this.translate.y;
+  }
+
   onMouseMove(e) {
     const requestDraw = DEBAUNCE_TIME > 16 ? throttle(this.draw.bind(this), DEBAUNCE_TIME) : this.draw.bind(this);
-    const mouseX = Controller.mouseX(e);
-    const mouseY = Controller.mouseY(e);
+    const mouseX = this.mouseX(e);
+    const mouseY = this.mouseY(e);
     let found = false;
     const r2 = 64;
 
     for (let i = 0; i < this.sites.length; i++) {
       const [x, y] = this.sites[i];
       if (Math.pow(x - mouseX, 2) + Math.pow(y - mouseY, 2) < r2) {
-        this.selectedSite = i;
+        this.state.selectedId = i;
         found = true;
       }
     }
 
-    if (!found) this.selectedSite = null;
-    requestDraw();
+    if (!found) this.state.selectedId = null;
   }
 
   rescalePoints(points, opts = {}) {
@@ -221,11 +233,13 @@ class Controller {
 window.addEventListener("load", () => {
   const header = document.getElementsByTagName("header")[0];
   const headerHeight = header.offsetHeight;
+  const svgTranslate = { x: 0, y: headerHeight };
 
   const svgEl = document.getElementById("viz");
-  svgEl.setAttribute("height", `${window.innerHeight - headerHeight - 15}`);
+  // TODO: Debug why 15
+  svgEl.setAttribute("height", `${window.innerHeight - svgTranslate.y - 15}`);
 
-  const interactiveClient = new Controller(svgEl);
+  const interactiveClient = new Controller(svgEl, svgTranslate);
   const csvHandler = new CSVHandler();
 
   document.getElementById("bs").addEventListener("change", (e) => {
