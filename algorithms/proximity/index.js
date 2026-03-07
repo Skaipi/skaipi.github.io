@@ -26,9 +26,9 @@ const getRandomPoints = (amount, width, height) => {
 };
 
 class Controller {
-  constructor(svgEl, globalTranslation) {
+  constructor(hostEl, globalTranslation) {
     this.translate = globalTranslation;
-    this.renderer = new GraphRenderer(svgEl);
+    this.renderer = new GraphRenderer(hostEl);
     this.painterSliders = [
       new SizeSlider({ value: DEFAULT_POINT_RADIUS }),
       new WidthSlider({ value: DEFAULT_EDGE_WIDTH }),
@@ -70,7 +70,7 @@ class Controller {
       },
     });
 
-    svgEl.addEventListener("mousemove", this.onMouseMove.bind(this));
+    hostEl.addEventListener("mousemove", this.onMouseMove.bind(this));
   }
 
   updatePoints(points) {
@@ -163,6 +163,12 @@ class Controller {
     if (!found) this.state.selectedId = null;
   }
 
+  enforceBigData() {
+    if (this.state.graphId === "bs" || this.state.graphId === "rng") {
+      this.changeGraph("nn");
+    }
+  }
+
   rescalePoints(points, opts = {}) {
     const { mode = "contain", flipY = true } = opts;
     if (!Array.isArray(points) || points.length === 0) return [];
@@ -235,11 +241,10 @@ window.addEventListener("load", () => {
   const headerHeight = header.offsetHeight;
   const svgTranslate = { x: 0, y: headerHeight };
 
-  const svgEl = document.getElementById("viz");
-  // TODO: Debug why 15
-  svgEl.setAttribute("height", `${window.innerHeight - svgTranslate.y - 15}`);
+  const hostEl = document.getElementById("viz-host");
+  hostEl.style.height = `${window.innerHeight - svgTranslate.y}px`;
 
-  const interactiveClient = new Controller(svgEl, svgTranslate);
+  const interactiveClient = new Controller(hostEl, svgTranslate);
   const csvHandler = new CSVHandler();
 
   document.getElementById("bs").addEventListener("change", (e) => {
@@ -303,12 +308,26 @@ window.addEventListener("load", () => {
 
     if (e.dataTransfer.files.length) {
       inputEl.files = e.dataTransfer.files;
-      csvHandler.loadFile(e.dataTransfer.files[0]).then(({ points }) => {
-        interactiveClient.updatePoints(points);
-      });
+      csvHandler.loadFile(e.dataTransfer.files[0]).then(loadNewPoints);
     }
   });
 
   // Activate default graph
   document.getElementById(DEFAULT_GRAPH).dispatchEvent(new Event("change"));
+
+  var betaSkeletonRadio = document.getElementById("bs");
+  var rngRadio = document.getElementById("rng");
+  var knnRadio = document.getElementById("nn");
+  const loadNewPoints = ({ points }) => {
+    const isBigData = points.length >= 1000;
+    betaSkeletonRadio.disabled = isBigData ? true : false;
+    rngRadio.disabled = isBigData ? true : false;
+
+    if (betaSkeletonRadio.checked || rngRadio.checked) {
+      knnRadio.checked = true;
+      interactiveClient.changeGraph("nn");
+    }
+
+    interactiveClient.updatePoints(points);
+  };
 });

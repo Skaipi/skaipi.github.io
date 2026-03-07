@@ -4,15 +4,15 @@
 .viz-wrapper {
   display: flex;
   flex-flow: row nowrap;
-
-  button {
-    width: 100%;
-  }
 }
 
 .mode-container {
   display: flex;
   flex-direction: column;
+}
+
+#viz-host {
+  width: 100%;
 }
 
 #controls-panel {
@@ -23,9 +23,4 @@
   padding: 1rem;
   overflow-y: auto;
   border-left: solid 2px #FFC857;
-}
-
-#canvas {
-  flex: 1;
-  display: block;
 }
