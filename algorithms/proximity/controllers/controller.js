@@ -1,3 +1,4 @@
+import { select, zoom, zoomIdentity, pointer } from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 import { quadtree } from "https://cdn.jsdelivr.net/npm/d3-quadtree@3.0.1/+esm";
 import { BetaSlider } from "../controlls/betaSlider.js";
 import { betaSkeleton } from "../models/betaGraph.js";
@@ -19,6 +20,7 @@ const DEFAULT_EDGE_WIDTH = 0.25;
 
 export class Controller {
   constructor(hostEl, globalTranslation) {
+    this.hostEl = hostEl;
     this.translate = globalTranslation;
     this.renderer = new GraphRenderer(hostEl);
     this.painterSliders = [
@@ -38,22 +40,22 @@ export class Controller {
       edgeWidth: DEFAULT_EDGE_WIDTH,
       rankThreshold: DEFAULT_RANK_THRESHOLD,
       selectedId: null,
+      transform: zoomIdentity,
     };
 
     // TODO: separate drawing and model state
     this.state = new Proxy(this._state, {
       set: (target, key, value) => {
         const prevValue = target[key];
+        if (value === prevValue) return true;
 
-        if (value !== prevValue) {
-          target[key] = value;
-          // Redraw only changes in state (no model recomputation)
-          if (key === "selectedId" || key === "edgeWidth" || key === "pointRadius") {
-            this.draw();
-            return true;
-          }
-          this.updateGraph();
+        target[key] = value;
+        // Redraw only changes in state (no model recomputation)
+        if (key === "selectedId" || key === "edgeWidth" || key === "pointRadius" || key === "transform") {
+          this.draw();
+          return true;
         }
+        this.updateGraph();
         return true;
       },
     });
@@ -69,6 +71,15 @@ export class Controller {
       },
     });
 
+    this.zoom = zoom()
+      .scaleExtent([0.5, 32])
+      .filter((event) => !event.button) // ignore right/middle button
+      .on("zoom", (event) => {
+        this.state.transform = event.transform;
+      });
+
+    select(this.hostEl).call(this.zoom);
+
     hostEl.addEventListener("mousemove", this.onMouseMove.bind(this));
   }
 
@@ -78,6 +89,8 @@ export class Controller {
       .x((d) => d.x)
       .y((d) => d.y)
       .addAll(this.sites.map(([x, y], i) => ({ x, y, i })));
+
+    this.resetZoomExtent();
     this.updateGraph();
   }
 
@@ -120,15 +133,11 @@ export class Controller {
     }
 
     if (id === "bs") {
-      this.model.graph = betaSkeleton(this.sites, this.state.beta);
       this.graphSliders.push(new BetaSlider({ value: this.state.beta }));
     } else if (id === "rng") {
-      this.model.graph = relativeNeighborGraph(this.sites);
     } else if (id === "nn") {
-      this.model.graph = nnGraph(this.sites, this.state.knn, this.quadtree);
       this.graphSliders.push(new KNNSlider({ value: this.state.knn }));
     } else if (id === "rknn") {
-      this.model.graph = rknnGraph(this.sites, this.state.knn, this.state.rankThreshold, this.quadtree);
       this.graphSliders.push(new KNNSlider({ value: this.state.knn }));
       this.graphSliders.push(new RankSlider({ value: this.state.rankThreshold }));
     }
@@ -140,22 +149,43 @@ export class Controller {
     this.renderer.render(this.model, this.state);
   }
 
-  mouseX(e) {
-    return e.clientX - this.translate.x;
-  }
+  resetZoomExtent() {
+    if (!this.sites.length) return;
 
-  mouseY(e) {
-    return e.clientY - this.translate.y;
+    let minX = Infinity,
+      minY = Infinity,
+      maxX = -Infinity,
+      maxY = -Infinity;
+    for (const [x, y] of this.sites) {
+      if (x < minX) minX = x;
+      if (x > maxX) maxX = x;
+      if (y < minY) minY = y;
+      if (y > maxY) maxY = y;
+    }
+
+    const pad = 40;
+
+    this.zoom
+      .extent([
+        [0, 0],
+        [this.renderer.width, this.renderer.height],
+      ])
+      .translateExtent([
+        [minX - pad, minY - pad],
+        [maxX + pad, maxY + pad],
+      ]);
+
+    select(this.hostEl).call(this.zoom.transform, zoomIdentity);
   }
 
   onMouseMove(e) {
-    const mouseX = this.mouseX(e);
-    const mouseY = this.mouseY(e);
-    const hoverRadius = 6;
+    const [sx, sy] = pointer(e, this.hostEl);
+    const [wx, wy] = this.state.transform.invert([sx, sy]);
+    const hoverRadiusPx = 6;
+    const hoverRadius = hoverRadiusPx / this.state.transform.k;
 
-    const hit = this.quadtree.find(mouseX, mouseY, hoverRadius);
-    const nextSelectedId = hit ? hit.i : null;
-    this.state.selectedId = nextSelectedId;
+    const hit = this.quadtree.find(wx, wy, hoverRadius);
+    this.state.selectedId = hit ? hit.i : null;
   }
 
   enforceBigData() {

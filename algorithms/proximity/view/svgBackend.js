@@ -14,19 +14,21 @@ export class SvgBackend extends BaseBackend {
     this.hostEl.replaceChildren(this.svgEl);
 
     this.svg = d3.select(this.svgEl);
-    this.gEdges = this.svg.append("g").attr("class", "edges");
-    this.gNodes = this.svg.append("g").attr("class", "nodes");
+    this.gScene = this.svg.append("g").attr("class", "scene");
+    this.gEdges = this.gScene.append("g").attr("class", "edges");
+    this.gNodes = this.gScene.append("g").attr("class", "nodes");
   }
 
   render(model, state) {
     const { graph } = model;
     const { width, height } = this.getSize();
-    const { pointRadius, edgeWidth, selectedId } = state;
+    const { pointRadius, edgeWidth, selectedId, transform } = state;
 
     const nodeById = new Map(graph.nodes.map((n) => [n.id, n]));
     const hasSelectedId = selectedId !== null;
 
     this.svg.attr("width", width).attr("height", height);
+    this.gScene.attr("transform", `translate(${transform.x},${transform.y}) scale(${transform.k})`);
 
     this.gEdges
       .selectAll("line")
@@ -38,7 +40,8 @@ export class SvgBackend extends BaseBackend {
       .attr("y2", (d) => nodeById.get(d.target).y)
       .attr("stroke", this.colors.EDGE_COLOR)
       .attr("opacity", (d) => (hasSelectedId && d.source !== selectedId && d.target !== selectedId ? 0.2 : 1))
-      .attr("stroke-width", edgeWidth);
+      .attr("stroke-width", edgeWidth)
+      .attr("vector-effect", "non-scaling-stroke");
 
     this.gNodes
       .selectAll("circle")

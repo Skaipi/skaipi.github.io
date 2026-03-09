@@ -56,7 +56,8 @@ export class CanvasBackend extends BaseBackend {
   render(model, state) {
     const { graph } = model;
     const { width, height } = this.getSize();
-    const { pointRadius, edgeWidth, selectedId } = state;
+    const { pointRadius, edgeWidth, selectedId, transform } = state;
+    const { x, y, k } = transform;
 
     const nodeById = new Map(graph.nodes.map((n) => [n.id, n]));
     const hasSelectedId = selectedId !== null;
@@ -65,12 +66,16 @@ export class CanvasBackend extends BaseBackend {
 
     const ctx = this.ctx;
 
-    // Clear in device pixels, then draw in CSS pixels.
+    // Clear in device pixels
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, this.canvasEl.width, this.canvasEl.height);
-    ctx.setTransform(this.pixelRatio, 0, 0, this.pixelRatio, 0, 0);
 
-    ctx.lineWidth = edgeWidth;
+    ctx.save();
+    ctx.setTransform(this.pixelRatio, 0, 0, this.pixelRatio, 0, 0);
+    ctx.translate(x, y);
+    ctx.scale(k, k);
+
+    ctx.lineWidth = edgeWidth / k;
     ctx.strokeStyle = this.colors.EDGE_COLOR;
 
     if (!hasSelectedId) {
@@ -113,10 +118,10 @@ export class CanvasBackend extends BaseBackend {
       }
 
       ctx.globalAlpha = 0.2;
-      this.fillNodes(dimNodes, pointRadius);
+      this.fillNodes(dimNodes, pointRadius / k);
 
       ctx.globalAlpha = 1;
-      this.fillNodes(strongNodes, pointRadius);
+      this.fillNodes(strongNodes, pointRadius / k);
     }
 
     ctx.globalAlpha = 1;
