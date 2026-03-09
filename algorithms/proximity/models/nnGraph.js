@@ -18,12 +18,7 @@ function buildIndex(points) {
     nodes[i] = { id: i, x, y };
   }
 
-  const qt = quadtree()
-    .x((d) => d.x)
-    .y((d) => d.y)
-    .addAll(pts);
-
-  return { pts, nodes, qt };
+  return { pts, nodes };
 }
 
 function allKnnIds(qt, pts, k) {
@@ -164,8 +159,15 @@ function knnIds(root, extent, q, k) {
   return Array.from(ids.subarray(0, found));
 }
 
-export function nnGraph(points, k = 5) {
-  const { pts, nodes, qt } = buildIndex(points);
+export function nnGraph(points, k = 5, quadTree = null) {
+  const { pts, nodes } = buildIndex(points);
+  const qt =
+    quadTree === null
+      ? quadtree()
+          .x((d) => d.x)
+          .y((d) => d.y)
+          .addAll(pts)
+      : quadTree;
   const neighbors = allKnnIds(qt, pts, k);
 
   const maxEdges = pts.length * Math.min(k, Math.max(0, pts.length - 1));
@@ -183,8 +185,15 @@ export function nnGraph(points, k = 5) {
   return { nodes, edges };
 }
 
-export function rknnGraph(points, k = 5, T = 1) {
-  const { pts, nodes, qt } = buildIndex(points);
+export function rknnGraph(points, k = 5, T = 1, quadTree = null) {
+  const { pts, nodes } = buildIndex(points);
+  const qt =
+    quadTree === null
+      ? quadtree()
+          .x((d) => d.x)
+          .y((d) => d.y)
+          .addAll(pts)
+      : quadTree;
   const neighbors = allKnnIds(qt, pts, k);
 
   // O(1)-ish reverse-rank lookup instead of findIndex on every edge.
