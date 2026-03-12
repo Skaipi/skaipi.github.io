@@ -5,7 +5,7 @@ export class KNNSlider extends Slider {
     super({ ...config, id: "knn", text: "K" });
 
     this.min = 1;
-    this.max = 10;
+    this.max = 20;
     this.step = 1;
     this.value = config?.value ?? 5;
 

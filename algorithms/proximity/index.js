@@ -18,7 +18,7 @@ window.addEventListener("load", () => {
   hostEl.style.height = `${window.innerHeight - svgTranslate.y}px`;
 
   const csvHandler = new CSVHandler();
-  const interactiveClient = new Controller(hostEl, svgTranslate);
+  const interactiveClient = new Controller(hostEl);
   const { width, height } = hostEl.getBoundingClientRect();
   interactiveClient.updatePoints(getRandomPoints(100, width, height));
 
@@ -101,7 +101,7 @@ window.addEventListener("load", () => {
 
     if (betaSkeletonRadio.checked || rngRadio.checked) {
       knnRadio.checked = true;
-      interactiveClient.changeGraph("nn");
+      knnRadio.dispatchEvent(new Event("change", {}));
     }
 
     interactiveClient.updatePoints(points);

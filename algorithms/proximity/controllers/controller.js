@@ -19,9 +19,8 @@ const DEFAULT_POINT_RADIUS = 2;
 const DEFAULT_EDGE_WIDTH = 0.25;
 
 export class Controller {
-  constructor(hostEl, globalTranslation) {
+  constructor(hostEl) {
     this.hostEl = hostEl;
-    this.translate = globalTranslation;
     this.renderer = new GraphRenderer(hostEl);
     this.painterSliders = [
       new SizeSlider({ value: DEFAULT_POINT_RADIUS }),
