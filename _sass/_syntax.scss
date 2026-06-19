@@ -1,0 +1,47 @@
+.post {
+
+    .highlight pre {
+        background: #161b22;
+        border: 1px solid rgba(255, 200, 87, 0.25);
+        border-radius: 8px;
+        overflow-x: auto;
+    }
+
+    code {
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    }
+
+    p code,
+    li code {
+        color: #ffc857;
+        background: rgba(255, 200, 87, 0.12);
+        padding: 0.15rem 0.35rem;
+        border-radius: 4px;
+    }
+}
+
+.highlight {
+    .k {
+        color: #ff7b72;
+    }
+
+    .s {
+        color: #a5d6ff;
+    }
+
+    .c {
+        color: #8b949e;
+    }
+
+    .nf {
+        color: #d2a8ff;
+    }
+
+    .nc {
+        color: #ffa657;
+    }
+
+    .mi {
+        color: #79c0ff;
+    }
+}
