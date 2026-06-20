@@ -2,7 +2,7 @@
 
 import { Painter } from "./drawing.js";
 import { throttle } from "../commons/debounce.js";
-import { generateHierarchicalCluster, getState, step } from "./simulation.js";
+import { generateCluster, getState, step } from "./simulation.js";
 // import { generateHierarchicalCluster, getState, step } from "./linearQuadtreeSimulation.js";
 
 const DEBAUNCE_TIME = 0;
@@ -27,8 +27,8 @@ class InteractiveClient {
     this.painter = new Painter(this.context);
     this.sites =
       treeType === TREE_TYPES.REGULAR
-        ? generateHierarchicalCluster(this.width, this.height)
-        : generateHierarchicalCluster(this.size, this.size);
+        ? generateCluster(this.width, this.height)
+        : generateCluster(this.size, this.size);
 
     this.showGrid = true;
     canvas.addEventListener("click", (e) => {

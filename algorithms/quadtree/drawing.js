@@ -16,7 +16,7 @@ export class Painter {
 
   drawTree = (tree) => {
     this.ctx.strokeStyle = this.VORONOI_EDGE_COLOR;
-    this.ctx.lineWidth = 1;
+    this.ctx.lineWidth = 0.66;
 
     const unvisitedNodes = [tree.root];
     while (unvisitedNodes.length > 0) {

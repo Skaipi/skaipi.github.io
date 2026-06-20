@@ -23,11 +23,11 @@ class QuadNode {
     ];
 
     // Pass over points to children
-    this.points.forEach((point) => {
-      this.children.forEach((child) => {
-        if (child.insert(point)) return;
-      });
-    });
+    for (const point of this.points) {
+      for (const child of this.children) {
+        if (child.insert(point)) break;
+      }
+    }
     this.points = [];
   }
 
@@ -52,6 +52,11 @@ class QuadNode {
 
 export class Quadtree {
   constructor(points, capacity = 1) {
+    if (points.length === 0) {
+      this.root = new QuadNode({ x0: 0, y0: 0, x1: 1, y1: 1 }, capacity);
+      return;
+    }
+
     let minX = Infinity;
     let minY = Infinity;
     let maxX = -Infinity;
@@ -59,18 +64,22 @@ export class Quadtree {
 
     for (let i = 0; i < points.length; i++) {
       const point = points[i];
-      if (point.x > 0 && point.x < minX) minX = point.x;
-      if (point.y > 0 && point.y < minY) minY = point.y;
-      if (point.x < window.innerWidth && point.x > maxX) maxX = point.x;
-      if (point.y < window.innerHeight && point.y > maxY) maxY = point.y;
+      if (point.x < minX) minX = point.x;
+      if (point.y < minY) minY = point.y;
+      if (point.x > maxX) maxX = point.x;
+      if (point.y > maxY) maxY = point.y;
     }
+
+    const centerX = (minX + maxX) * 0.5;
+    const centerY = (minY + maxY) * 0.5;
+    const halfSize = Math.max(maxX - minX, maxY - minY, 1) * 0.5 + 1;
 
     this.root = new QuadNode(
       {
-        x0: minX,
-        y0: minY,
-        x1: maxX,
-        y1: maxY,
+        x0: centerX - halfSize,
+        y0: centerY - halfSize,
+        x1: centerX + halfSize,
+        y1: centerY + halfSize,
       },
       capacity,
     );
