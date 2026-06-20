@@ -37,6 +37,7 @@ Before writing any code, define the contract. A workable contract for Python loo
 - object state is represented by opaque (void) pointers
 - variable-sized results are allocated by the C# library and freed by a matching exported free function
 - failures are reported by integer status codes, with error text retrievable through a separate API
+
 The explicit `cdecl` is deliberate. `ctypes.CDLL` expects the standard C calling convention. Although x64 and ARM64 make `cdecl` and `stdcall` effectively interchangeable, we keep the calling convention explicit. `UnmanagedCallersOnly` also uses the default platform calling convention if `CallConvs` is omitted, so writing `CallConvCdecl` makes the boundary definition concrete instead of implicit.
 
 ## Error reporting across the boundary
