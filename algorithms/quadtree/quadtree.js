@@ -53,37 +53,19 @@ class QuadNode {
   }
 
   updateMass() {
-    if (this.children.length === 0) {
-      this.updateLeafMass();
-      return;
-    }
-
+    const hasChildren = this.children.length > 0;
+    const sources = hasChildren ? this.children : this.points;
     let mass = 0;
     let weightedX = 0;
     let weightedY = 0;
 
-    for (const child of this.children) {
-      child.updateMass();
-      mass += child.mass;
-      weightedX += child.mass * child.comX;
-      weightedY += child.mass * child.comY;
-    }
+    for (const source of sources) {
+      if (hasChildren) source.updateMass();
 
-    this.mass = mass;
-    this.comX = mass > 0 ? weightedX / mass : 0;
-    this.comY = mass > 0 ? weightedY / mass : 0;
-  }
-
-  updateLeafMass() {
-    let mass = 0;
-    let weightedX = 0;
-    let weightedY = 0;
-
-    for (const point of this.points) {
-      const pointMass = point.m ?? 1;
-      mass += pointMass;
-      weightedX += pointMass * point.x;
-      weightedY += pointMass * point.y;
+      const sourceMass = hasChildren ? source.mass : (source.m ?? 1);
+      mass += sourceMass;
+      weightedX += sourceMass * (hasChildren ? source.comX : source.x);
+      weightedY += sourceMass * (hasChildren ? source.comY : source.y);
     }
 
     this.mass = mass;
