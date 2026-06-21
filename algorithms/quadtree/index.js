@@ -1,16 +1,7 @@
 "use strict";
 
 import { Painter } from "./drawing.js";
-import { throttle } from "../commons/debounce.js";
-import { generateCluster, getState, step } from "./simulation.js";
-// import { generateHierarchicalCluster, getState, step } from "./linearQuadtreeSimulation.js";
-
-const DEBAUNCE_TIME = 0;
-const TREE_TYPES = {
-  REGULAR: "regular",
-  LINEAR: "linear",
-};
-const treeType = TREE_TYPES.REGULAR;
+import { createBarnesHutSimulation } from "./simulation.js";
 
 const resizeCanvas = () => {
   const header = document.getElementsByTagName("header")[0];
@@ -25,13 +16,13 @@ class InteractiveClient {
   constructor(canvas) {
     this.context = canvas.getContext("2d");
     this.painter = new Painter(this.context);
-    this.sites =
-      treeType === TREE_TYPES.REGULAR
-        ? generateCluster(this.width, this.height)
-        : generateCluster(this.size, this.size);
-
+    this.simulation = createBarnesHutSimulation();
     this.showGrid = true;
-    canvas.addEventListener("click", (e) => {
+    this.draw = this.draw.bind(this);
+
+    this.simulation.generateCluster(this.width, this.height);
+
+    canvas.addEventListener("click", () => {
       this.showGrid = !this.showGrid;
     });
   }
@@ -39,41 +30,22 @@ class InteractiveClient {
   get width() {
     return this.context.canvas.width;
   }
+
   get height() {
     return this.context.canvas.height;
   }
 
-  get size() {
-    const widthBits = Math.floor(Math.log2(this.width));
-    const heightBits = Math.floor(Math.log2(this.height));
-    const sizeBits = Math.min(widthBits, heightBits);
-    return 1 << sizeBits;
-  }
-
   draw() {
-    const quadtree = treeType === TREE_TYPES.REGULAR ? step(this.width, this.height) : step(this.size, this.size);
-    const sites = getState();
+    const quadtree = this.simulation.step(this.width, this.height);
 
     this.painter.drawBackground();
-
-    if (treeType === TREE_TYPES.REGULAR) this.painter.drawSites(sites);
-    else this.painter.drawLinearSites(sites);
+    this.painter.drawSites(this.simulation.getState());
 
     if (this.showGrid) {
-      if (treeType === TREE_TYPES.REGULAR) this.painter.drawTree(quadtree);
-      else this.painter.drawLinearTree(quadtree);
+      this.painter.drawTree(quadtree);
     }
-    requestAnimationFrame(this.draw.bind(this));
-  }
 
-  static mouseX = (e) => e.clientX - e.target.offsetLeft;
-  static mouseY = (e) => e.clientY - e.target.offsetTop;
-  onMouseMove(e) {
-    const requestDraw = DEBAUNCE_TIME > 16 ? throttle(this.draw.bind(this), DEBAUNCE_TIME) : this.draw.bind(this);
-    const last = this.sites[this.sites.length - 1];
-    last.x = InteractiveClient.mouseX(e);
-    last.y = InteractiveClient.mouseY(e);
-    requestDraw();
+    requestAnimationFrame(this.draw);
   }
 }
 

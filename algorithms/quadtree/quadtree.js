@@ -4,6 +4,9 @@ class QuadNode {
     this.capacity = capacity;
     this.points = [];
     this.children = [];
+    this.mass = 0;
+    this.comX = 0;
+    this.comY = 0;
   }
 
   contains(point) {
@@ -48,6 +51,45 @@ class QuadNode {
     }
     return false; // should not happen
   }
+
+  updateMass() {
+    if (this.children.length === 0) {
+      this.updateLeafMass();
+      return;
+    }
+
+    let mass = 0;
+    let weightedX = 0;
+    let weightedY = 0;
+
+    for (const child of this.children) {
+      child.updateMass();
+      mass += child.mass;
+      weightedX += child.mass * child.comX;
+      weightedY += child.mass * child.comY;
+    }
+
+    this.mass = mass;
+    this.comX = mass > 0 ? weightedX / mass : 0;
+    this.comY = mass > 0 ? weightedY / mass : 0;
+  }
+
+  updateLeafMass() {
+    let mass = 0;
+    let weightedX = 0;
+    let weightedY = 0;
+
+    for (const point of this.points) {
+      const pointMass = point.m ?? 1;
+      mass += pointMass;
+      weightedX += pointMass * point.x;
+      weightedY += pointMass * point.y;
+    }
+
+    this.mass = mass;
+    this.comX = mass > 0 ? weightedX / mass : 0;
+    this.comY = mass > 0 ? weightedY / mass : 0;
+  }
 }
 
 export class Quadtree {
@@ -87,5 +129,7 @@ export class Quadtree {
     points.forEach((zIndex) => {
       this.root.insert(zIndex);
     });
+
+    this.root.updateMass();
   }
 }
