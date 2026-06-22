@@ -1,5 +1,6 @@
 ---
 ---
+
 @import "inputs";
 @import "syntax";
 
@@ -237,7 +238,7 @@ section:not(:last-child) {
         filter: blur(8px);
     }
 
-    > * {
+    >* {
         position: relative;
         z-index: 1;
     }
@@ -315,7 +316,6 @@ section:not(:last-child) {
 .node,
 .edge {
     position: absolute;
-    z-index: 2;
 }
 
 .node {
@@ -326,13 +326,33 @@ section:not(:last-child) {
     border-radius: 50%;
     box-shadow: 0 0 0 6px rgba(255, 200, 87, 0.16), 0 0 32px rgba(255, 200, 87, 0.42);
     transform: translate(-50%, -50%);
+    z-index: 200;
 }
 
-.node-a { left: 18%; top: 28%; }
-.node-b { left: 62%; top: 18%; }
-.node-c { left: 82%; top: 48%; }
-.node-d { left: 45%; top: 72%; }
-.node-e { left: 16%; top: 80%; }
+.node-a {
+    left: 18%;
+    top: 28%;
+}
+
+.node-b {
+    left: 62%;
+    top: 18%;
+}
+
+.node-c {
+    left: 82%;
+    top: 48%;
+}
+
+.node-d {
+    left: 45%;
+    top: 72%;
+}
+
+.node-e {
+    left: 16%;
+    top: 80%;
+}
 
 .edge {
     height: 2px;
@@ -340,12 +360,36 @@ section:not(:last-child) {
     border-radius: 999px;
     box-shadow: 0 0 18px rgba(44, 182, 125, 0.28);
     transform-origin: left center;
+    z-index: 100;
 }
 
-.edge-a { left: 18%; top: 28%; width: 46%; transform: rotate(-13deg); }
-.edge-b { left: 62%; top: 18%; width: 36%; transform: rotate(54deg); }
-.edge-c { left: 45%; top: 72%; width: 43%; transform: rotate(-33deg); }
-.edge-d { left: 16%; top: 80%; width: 31%; transform: rotate(-13deg); }
+.edge-a {
+    left: 18%;
+    top: 28%;
+    width: 46%;
+    transform: rotate(-13deg);
+}
+
+.edge-b {
+    left: 62%;
+    top: 18%;
+    width: 36%;
+    transform: rotate(56deg);
+}
+
+.edge-c {
+    left: 45%;
+    top: 72%;
+    width: 43%;
+    transform: rotate(-33deg);
+}
+
+.edge-d {
+    left: 16%;
+    top: 80%;
+    width: 31%;
+    transform: rotate(-16deg);
+}
 
 
 #about h2,
