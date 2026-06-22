@@ -39,6 +39,21 @@ body {
     }
 }
 
+.post-dates {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.9rem;
+    color: #8F9AA3;
+    font-size: 0.9rem;
+    margin: 0 0 18px;
+
+    span:not(:last-child)::after {
+        content: '·';
+        color: #FFC857;
+        margin-left: 0.9rem;
+    }
+}
+
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -439,6 +454,11 @@ section:not(:last-child) {
 .post-card p {
     color: #B2B9BF;
     margin-bottom: 10px;
+}
+
+#latest-posts .post-dates {
+    color: #8F9AA3;
+    margin-bottom: 12px;
 }
 
 .post-card a {

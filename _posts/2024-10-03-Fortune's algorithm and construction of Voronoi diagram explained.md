@@ -1,6 +1,7 @@
 ---
 title: Fortune's algorithm and construction of Voronoi diagram explained
 layout: markdown_post
+updated: 2024-10-03
 ---
 A while ago, I revisited nearest neighbor search methods. A few Wikipedia articles later, I decided to write my own implementation of a Voronoi diagram. Specifically I wanted to use Fortune's algorithm. It wasn't easy to find a good explanation of this algorithm and "clean" (in terms of readability) implementation was almost nonexistent. Nevertheless, I decided to create one and share it here. The code and demo is available here: [demo](/algorithms/fortune/)
 

@@ -1,0 +1,14 @@
+{% if include.post %}
+  {% assign created_at = include.post.date %}
+  {% assign updated_at = include.post.updated | default: created_at %}
+{% else %}
+  {% assign created_at = page.date %}
+  {% assign updated_at = page.updated | default: created_at %}
+{% endif %}
+
+{% if created_at %}
+<p class="post-dates">
+  <span>Created: <time datetime="{{ created_at | date: "%Y-%m-%d" }}">{{ created_at | date: "%B %-d, %Y" }}</time></span>
+  <span>Edited: <time datetime="{{ updated_at | date: "%Y-%m-%d" }}">{{ updated_at | date: "%B %-d, %Y" }}</time></span>
+</p>
+{% endif %}

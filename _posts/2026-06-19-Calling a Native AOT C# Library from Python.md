@@ -1,6 +1,7 @@
 ---
 title: Calling a Native AOT C# Library from Python
 layout: markdown_post
+updated: 2026-06-20
 ---
 # Calling a Native AOT C# Library from Python with ctypes
 Python remains dominant in data science and AI not because CPython is fast at CPU-bound work, but because it is very good at orchestrating native code. The hot path usually lives elsewhere: C, C++, Rust, or some other compiled runtime. Python stays in control, while the expensive work happens behind a narrow ABI boundary. Native Ahead of Time (AOT) compilation makes C# a credible option for that role as well: it can publish a self-contained shared library, and methods marked with `UnmanagedCallersOnly` plus a non-null `EntryPoint` are emitted as native exports. On the Python side, functions loaded through `ctypes.CDLL` use the C calling convention and release the GIL for the duration of the foreign call.
