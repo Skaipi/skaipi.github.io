@@ -33,9 +33,25 @@ body {
 
 .post {
     padding: 10px 0 40px 0;
+    overflow-wrap: break-word;
 
     a {
         color: #FFC857;
+    }
+
+    img,
+    svg,
+    video {
+        max-width: 100%;
+        height: auto;
+    }
+
+    table,
+    mjx-container[display="true"] {
+        display: block;
+        max-width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
     }
 }
 
@@ -70,31 +86,43 @@ header {
     -webkit-backdrop-filter: blur(18px);
     backdrop-filter: blur(18px);
     border-bottom: 1px solid #FFC857;
-    padding: 20px 0;
+    padding: 18px 0;
     position: sticky;
     top: 0;
     z-index: 1000;
 }
 
 header h1 {
-    display: inline-block;
     color: #E1E8ED;
-    font-size: 1.8em;
+    font-size: clamp(1.25rem, 2vw, 1.8rem);
+    line-height: 1.2;
+    margin: 0;
+    padding: 0;
+    border-bottom: 0;
 }
 
 nav {
-    ul {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+
+    > ul {
         list-style: none;
-        display: inline-block;
-        float: right;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.35rem 1.25rem;
+        margin: 0;
+        padding: 0;
         position: relative;
 
-        li {
-            display: inline;
-            margin-left: 20px;
+        > li {
+            display: block;
             position: relative;
 
-            a {
+            > a {
                 color: #B2B9BF;
                 transition: color 0.3s;
 
@@ -144,7 +172,8 @@ button,
     position: relative;
     display: inline-block;
 
-    &:hover {
+    &:hover,
+    &:focus-within {
         .dropdown-content {
             display: block;
         }
@@ -154,6 +183,10 @@ button,
 .dropdown-content {
     display: none;
     position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    list-style: none;
+    margin: 0;
     padding: 0;
     background-color: #0D1117;
     min-width: 250px;
@@ -500,6 +533,54 @@ footer p {
 @media (max-width: 640px) {
     body {
         background-attachment: scroll;
+    }
+
+    header {
+        position: static;
+        padding: 12px 0;
+    }
+
+    header .container {
+        padding: 0 14px;
+    }
+
+    header h1 {
+        font-size: 1.25rem;
+    }
+
+    nav {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    nav > ul {
+        justify-content: flex-start;
+        width: 100%;
+        gap: 0.35rem 0.9rem;
+        font-size: 0.95rem;
+    }
+
+    nav > ul > li > a {
+        display: block;
+        padding: 4px 0;
+    }
+
+    .dropdown:hover,
+    .dropdown:focus-within {
+        width: 100%;
+    }
+
+    .dropdown-content {
+        position: static;
+        width: 100%;
+        min-width: 0;
+        margin-top: 6px;
+        box-shadow: none;
+    }
+
+    .dropdown-content li a {
+        padding: 8px 0 8px 12px;
     }
 
     #hero {
