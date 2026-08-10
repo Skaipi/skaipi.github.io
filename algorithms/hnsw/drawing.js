@@ -1,12 +1,23 @@
+// const COLORS = {
+//   BACKGROUND: "#0D1117",
+//   SURFACE: "#161B22",
+//   SURFACE_STROKE: "#B2B9BF",
+//   NODE: "#FFC857",
+//   PROMOTED_NODE: "#E1E8ED",
+//   EDGE: "#2CB67D",
+//   LINK: "#B2B9BF",
+//   TEXT: "#E1E8ED",
+// };
+
 const COLORS = {
-  BACKGROUND: "#0D1117",
-  SURFACE: "#161B22",
-  SURFACE_STROKE: "#B2B9BF",
-  NODE: "#FFC857",
-  PROMOTED_NODE: "#E1E8ED",
-  EDGE: "#2CB67D",
-  LINK: "#B2B9BF",
-  TEXT: "#E1E8ED",
+  BACKGROUND: "#FFFFFF",
+  SURFACE: "#F6F7F9",
+  SURFACE_STROKE: "#B8BEC8",
+  NODE: "#0072B2",
+  PROMOTED_NODE: "#D55E00",
+  EDGE: "#3A3A3A",
+  LINK: "#8A8F98",
+  TEXT: "#1A1A1A",
 };
 
 const NODE_RADIUS = 14;
@@ -50,6 +61,25 @@ export class Painter {
     for (let level = planesCount - 1; level >= 0; level -= 1) {
       this.drawLayerGraph(model.layers[level], planes[level]);
     }
+  }
+
+  downloadPng(filename = "hnsw-render.png") {
+    const canvas = this.ctx.canvas;
+
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      setTimeout(() => URL.revokeObjectURL(url), 0);
+    }, "image/png");
   }
 
   drawPlane(plane, layer) {

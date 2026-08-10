@@ -107,6 +107,7 @@ function createLayerPlanes(width, height) {
 
 window.addEventListener("load", () => {
   const canvas = document.getElementById("canvas");
+  const downloadButton = document.getElementById("download-render");
   const model = createHnswModel();
   const canvasModel = resizeCanvas(canvas);
 
@@ -115,6 +116,10 @@ window.addEventListener("load", () => {
 
   const painter = new Painter(canvasModel);
   painter.draw(model, planes);
+
+  downloadButton?.addEventListener("click", () => {
+    painter.downloadPng();
+  });
 
   window.addEventListener("resize", () => {
     const { context, width, height } = canvasModel;
