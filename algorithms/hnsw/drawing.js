@@ -1,24 +1,6 @@
-// const COLORS = {
-//   BACKGROUND: "#0D1117",
-//   SURFACE: "#161B22",
-//   SURFACE_STROKE: "#B2B9BF",
-//   NODE: "#FFC857",
-//   PROMOTED_NODE: "#E1E8ED",
-//   EDGE: "#2CB67D",
-//   LINK: "#B2B9BF",
-//   TEXT: "#E1E8ED",
-// };
+import { DEFAULT_PALETTE_ID, getPalette } from "./palettes.js";
 
-const COLORS = {
-  BACKGROUND: "#FFFFFF",
-  SURFACE: "#F6F7F9",
-  SURFACE_STROKE: "#B8BEC8",
-  NODE: "#0072B2",
-  PROMOTED_NODE: "#D55E00",
-  EDGE: "#3A3A3A",
-  LINK: "#8A8F98",
-  TEXT: "#1A1A1A",
-};
+const DEFAULT_COLORS = getPalette(DEFAULT_PALETTE_ID).colors;
 
 const NODE_RADIUS = 14;
 const NODE_BORDER_SCALE = 1.25;
@@ -42,18 +24,29 @@ export class Painter {
     this.nodeBorderScale = config.nodeBorderScale ?? NODE_BORDER_SCALE;
     this.skewFactor = config.nodeSkewFactor ?? 0.2;
 
-    this.BACKGROUND_COLOR = config.backgroundColor ?? COLORS.BACKGROUND;
-    this.GRID_COLOR = config.edgeColor ?? COLORS.EDGE;
+    this.setColors(config.colors);
+  }
+
+  resize(canvasModel) {
+    const { context, width, height } = canvasModel;
+
+    this.ctx = context;
+    this.width = width;
+    this.height = height;
+  }
+
+  setColors(colors = {}) {
+    this.colors = { ...DEFAULT_COLORS, ...colors };
   }
 
   draw(model, planes) {
-    this.ctx.fillStyle = this.BACKGROUND_COLOR;
+    this.ctx.fillStyle = this.colors.BACKGROUND;
     this.ctx.fillRect(0, 0, this.width, this.height);
 
     const planesCount = planes.length;
 
     for (let level = planesCount - 1; level >= 0; level -= 1) {
-      this.drawPlane(planes[level], level);
+      this.drawPlane(planes[level]);
     }
 
     this.drawPromotionLinks(model, planes);
@@ -82,7 +75,7 @@ export class Painter {
     }, "image/png");
   }
 
-  drawPlane(plane, layer) {
+  drawPlane(plane) {
     this.ctx.save();
 
     this.ctx.beginPath();
@@ -92,12 +85,12 @@ export class Painter {
     this.ctx.lineTo(plane.left + plane.skew, plane.top + plane.height);
     this.ctx.closePath();
 
-    this.ctx.fillStyle = COLORS.SURFACE;
+    this.ctx.fillStyle = this.colors.SURFACE;
     this.ctx.globalAlpha = 0.88;
     this.ctx.fill();
 
     this.ctx.globalAlpha = 0.7;
-    this.ctx.strokeStyle = COLORS.SURFACE_STROKE;
+    this.ctx.strokeStyle = this.colors.SURFACE_STROKE;
     this.ctx.lineWidth = 1.5;
     this.ctx.stroke();
 
@@ -107,7 +100,7 @@ export class Painter {
   drawPromotionLinks(model, planes) {
     this.ctx.save();
 
-    this.ctx.strokeStyle = COLORS.LINK;
+    this.ctx.strokeStyle = this.colors.LINK;
     this.ctx.globalAlpha = 0.55;
     this.ctx.lineWidth = 2;
     this.ctx.setLineDash([8, 8]);
@@ -137,7 +130,7 @@ export class Painter {
 
     this.ctx.save();
 
-    this.ctx.strokeStyle = COLORS.EDGE;
+    this.ctx.strokeStyle = this.colors.EDGE;
     this.ctx.globalAlpha = 0.88;
     this.ctx.lineWidth = 1.6;
 
@@ -168,12 +161,12 @@ export class Painter {
 
     this.ctx.beginPath();
     this.ctx.ellipse(point.x, point.y, radiusX + borderWidth, radiusY + borderWidth, 0, 0, Math.PI * 2);
-    this.ctx.fillStyle = COLORS.EDGE;
+    this.ctx.fillStyle = this.colors.EDGE;
     this.ctx.fill();
 
     this.ctx.beginPath();
     this.ctx.ellipse(point.x, point.y, radiusX, radiusY, 0, 0, Math.PI * 2);
-    this.ctx.fillStyle = isPromoted ? COLORS.PROMOTED_NODE : COLORS.NODE;
+    this.ctx.fillStyle = isPromoted ? this.colors.PROMOTED_NODE : this.colors.NODE;
     this.ctx.fill();
 
     this.ctx.restore();
