@@ -6,7 +6,6 @@ const POINT_COUNT = 20;
 const MIDDLE_LAYER_COUNT = 16;
 const TOP_LAYER_COUNT = 4;
 const LAYER_COUNT = 3;
-const SEED = 20260809;
 const SKEW_FACTOR = 0.2;
 const DISTRIBUTION_RATE = 1.4;
 
@@ -27,7 +26,7 @@ const dist2 = (a, b) => (a.x - b.x) ** 2 + (a.y - b.y) ** 2;
 function createPoints(count) {
   const points = [];
 
-  for (let i=0; i < count; i++) {
+  for (let i = 0; i < count; i++) {
     const layer = parseInt(-Math.log(Math.random()) * DISTRIBUTION_RATE);
 
     const point = {
@@ -43,7 +42,7 @@ function createPoints(count) {
 }
 
 function createHnswModel() {
-  const points = createPoints(POINT_COUNT, SEED);
+  const points = createPoints(POINT_COUNT);
 
   const layers = [];
   for (let layer = 0; layer < LAYER_COUNT; layer += 1) {
@@ -89,10 +88,7 @@ function createLayerPlanes(width, height) {
   const planeHeight = clamp(height * 0.17, 72, 125);
   const topMargin = clamp(height * 0.06, 24, 44);
   const bottomMargin = 36;
-  const gap = Math.max(
-    42,
-    (height - topMargin - bottomMargin - planeHeight * LAYER_COUNT) / (LAYER_COUNT - 1),
-  );
+  const gap = Math.max(42, (height - topMargin - bottomMargin - planeHeight * LAYER_COUNT) / (LAYER_COUNT - 1));
   const planes = [];
 
   for (let level = 0; level < LAYER_COUNT; level += 1) {
@@ -112,7 +108,36 @@ function createLayerPlanes(width, height) {
 window.addEventListener("load", () => {
   const canvas = document.getElementById("canvas");
   const model = createHnswModel();
+  const canvasModel = resizeCanvas(canvas);
 
-  draw(model, canvas);
-  window.addEventListener("resize", () => draw(model, canvas));
+  const { context, width, height } = canvasModel;
+  const planes = createLayerPlanes(width, height);
+
+  const painter = new Painter(canvasModel);
+  painter.draw(model, planes);
+
+  window.addEventListener("resize", () => {
+    const { context, width, height } = canvasModel;
+    const planes = createLayerPlanes(width, height);
+
+    painter.draw(model, planes);
+  });
 });
+
+function resizeCanvas(canvas) {
+  const header = document.getElementsByTagName("header")[0];
+  const headerHeight = header?.offsetHeight ?? 0;
+  const targetHeight = Math.max(430, window.innerHeight - headerHeight);
+
+  canvas.style.height = `${targetHeight}px`;
+
+  const rect = canvas.getBoundingClientRect();
+  const pixelRatio = window.devicePixelRatio || 1;
+  canvas.width = Math.max(1, Math.round(rect.width * pixelRatio));
+  canvas.height = Math.max(1, Math.round(rect.height * pixelRatio));
+
+  const context = canvas.getContext("2d");
+  context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+
+  return { context, width: rect.width, height: rect.height };
+}

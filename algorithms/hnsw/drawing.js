@@ -9,6 +9,8 @@ const COLORS = {
   TEXT: "#E1E8ED",
 };
 
+const NODE_RADIUS = 14;
+const NODE_BORDER_SCALE = 1.25;
 
 function project(point, plane) {
   return {
@@ -17,75 +19,72 @@ function project(point, plane) {
   };
 }
 
-function resizeCanvas(canvas) {
-  const header = document.getElementsByTagName("header")[0];
-  const headerHeight = header?.offsetHeight ?? 0;
-  const targetHeight = Math.max(430, window.innerHeight - headerHeight);
-
-  canvas.style.height = `${targetHeight}px`;
-
-  const rect = canvas.getBoundingClientRect();
-  const pixelRatio = window.devicePixelRatio || 1;
-  canvas.width = Math.max(1, Math.round(rect.width * pixelRatio));
-  canvas.height = Math.max(1, Math.round(rect.height * pixelRatio));
-
-  const context = canvas.getContext("2d");
-  context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-
-  return { context, width: rect.width, height: rect.height };
-}
-
 export class Painter {
-  constructor(context, config = {}) {
+  constructor(canvasModel, config = {}) {
+    const { context, width, height } = canvasModel;
+
     this.ctx = context;
+    this.width = width;
+    this.height = height;
+
+    this.nodeRadius = config.nodeRadius ?? NODE_RADIUS;
+    this.nodeBorderScale = config.nodeBorderScale ?? NODE_BORDER_SCALE;
+    this.skewFactor = config.nodeSkewFactor ?? 0.2;
+
     this.BACKGROUND_COLOR = config.backgroundColor ?? COLORS.BACKGROUND;
     this.GRID_COLOR = config.edgeColor ?? COLORS.EDGE;
   }
 
-  draw(model, canvas) {
-    const { context, width, height } = resizeCanvas(canvas);
-    const planes = createLayerPlanes(width, height);
+  draw(model, planes) {
+    this.ctx.fillStyle = this.BACKGROUND_COLOR;
+    this.ctx.fillRect(0, 0, this.width, this.height);
 
-    this.ctx.fillStyle = COLORS.BACKGROUND;
-    this.ctx.fillRect(0, 0, width, height);
+    const planesCount = planes.length;
 
-    for (let level = LAYER_COUNT - 1; level >= 0; level -= 1) {
-      drawPlane(planes[level], level);
+    for (let level = planesCount - 1; level >= 0; level -= 1) {
+      this.drawPlane(planes[level], level);
     }
 
-    drawPromotionLinks(model, planes);
+    this.drawPromotionLinks(model, planes);
 
-    for (let level = LAYER_COUNT - 1; level >= 0; level -= 1) {
-      drawLayerGraph(model.layers[level], planes[level]);
+    for (let level = planesCount - 1; level >= 0; level -= 1) {
+      this.drawLayerGraph(model.layers[level], planes[level]);
     }
   }
 
   drawPlane(plane, layer) {
     this.ctx.save();
+
     this.ctx.beginPath();
     this.ctx.moveTo(plane.left, plane.top);
     this.ctx.lineTo(plane.left + plane.width, plane.top);
     this.ctx.lineTo(plane.left + plane.width + plane.skew, plane.top + plane.height);
     this.ctx.lineTo(plane.left + plane.skew, plane.top + plane.height);
     this.ctx.closePath();
+
     this.ctx.fillStyle = COLORS.SURFACE;
     this.ctx.globalAlpha = 0.88;
     this.ctx.fill();
+
     this.ctx.globalAlpha = 0.7;
     this.ctx.strokeStyle = COLORS.SURFACE_STROKE;
     this.ctx.lineWidth = 1.5;
     this.ctx.stroke();
+
     this.ctx.restore();
   }
 
   drawPromotionLinks(model, planes) {
     this.ctx.save();
+
     this.ctx.strokeStyle = COLORS.LINK;
     this.ctx.globalAlpha = 0.55;
     this.ctx.lineWidth = 2;
     this.ctx.setLineDash([8, 8]);
 
-    for (let level = 1; level < LAYER_COUNT; level += 1) {
+    const planesCount = planes.length;
+
+    for (let level = 1; level < planesCount; level += 1) {
       const upperPlane = planes[level];
       const lowerPlane = planes[level - 1];
 
@@ -107,6 +106,7 @@ export class Painter {
     const nodeById = new Map(layer.nodes.map((node) => [node.id, node]));
 
     this.ctx.save();
+
     this.ctx.strokeStyle = COLORS.EDGE;
     this.ctx.globalAlpha = 0.88;
     this.ctx.lineWidth = 1.6;
@@ -124,23 +124,28 @@ export class Painter {
     this.ctx.restore();
 
     for (const node of layer.nodes) {
-      drawNode(project(node, plane), node.maxLayer > layer.level);
+      this.drawNode(project(node, plane), node.maxLayer > layer.level);
     }
   }
 
   drawNode(point, isPromoted) {
+    const radiusX = this.nodeRadius;
+    const radiusY = this.nodeRadius * this.skewFactor;
+
+    const borderWidth = 2;
+
     this.ctx.save();
+
     this.ctx.beginPath();
-    this.ctx.ellipse(point.x, point.y, 8.5, 6.5, 0, 0, Math.PI * 2);
+    this.ctx.ellipse(point.x, point.y, radiusX + borderWidth, radiusY + borderWidth, 0, 0, Math.PI * 2);
     this.ctx.fillStyle = COLORS.EDGE;
-    this.ctx.globalAlpha = 0.95;
     this.ctx.fill();
 
     this.ctx.beginPath();
-    this.ctx.ellipse(point.x, point.y, 6.8, 5, 0, 0, Math.PI * 2);
+    this.ctx.ellipse(point.x, point.y, radiusX, radiusY, 0, 0, Math.PI * 2);
     this.ctx.fillStyle = isPromoted ? COLORS.PROMOTED_NODE : COLORS.NODE;
-    this.ctx.globalAlpha = 1;
     this.ctx.fill();
+
     this.ctx.restore();
   }
 }
