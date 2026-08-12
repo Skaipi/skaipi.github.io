@@ -18,7 +18,7 @@ export const PALETTES = {
     label: "PDF export pallete",
     colors: {
       BACKGROUND: "#FFFFFF",
-      SURFACE: "#F6F7F9",
+      SURFACE: "#C8CED8",
       SURFACE_STROKE: "#B8BEC8",
       NODE: "#0072B2",
       PROMOTED_NODE: "#D55E00",

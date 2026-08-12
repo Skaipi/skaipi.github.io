@@ -2,15 +2,11 @@ import { Painter } from "../drawing.js";
 import { createHnswModel } from "../models/hnswGraph.js";
 import { DEFAULT_PALETTE_ID, getPalette } from "../palettes.js";
 
-const SKEW_FACTOR = 0.2;
-
-const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-
 export class Controller {
   constructor(canvas, { paletteId = DEFAULT_PALETTE_ID } = {}) {
     this.canvas = canvas;
-    this.model = createHnswModel();
     this.canvasModel = resizeCanvas(canvas);
+    this.model = createHnswModel({ width: this.canvasModel.width, height: this.canvasModel.height });
     this.painter = new Painter(this.canvasModel, { colors: getPalette(paletteId).colors });
 
     this._state = { paletteId: getPalette(paletteId).id };
@@ -45,10 +41,7 @@ export class Controller {
 
     this.canvas.style.backgroundColor = palette.colors.BACKGROUND;
     this.painter.setColors(palette.colors);
-    this.painter.draw(
-      this.model,
-      createLayerPlanes(this.canvasModel.width, this.canvasModel.height, this.model.layers.length),
-    );
+    this.painter.draw(this.model);
   }
 
   resize() {
@@ -58,33 +51,8 @@ export class Controller {
   }
 
   downloadRender() {
-    this.painter.downloadPng();
+    this.painter.downloadPng(this.model);
   }
-}
-
-function createLayerPlanes(width, height, layerCount) {
-  const marginX = width * 0.05;
-  const skew = width * SKEW_FACTOR;
-  const planeWidth = Math.max(220, width - marginX * 2 - skew);
-  const planeHeight = clamp(height * 0.17, 72, 125);
-  const topMargin = clamp(height * 0.06, 24, 44);
-  const bottomMargin = 36;
-  const gapCount = Math.max(1, layerCount - 1);
-  const gap = Math.max(42, (height - topMargin - bottomMargin - planeHeight * layerCount) / gapCount);
-  const planes = [];
-
-  for (let level = 0; level < layerCount; level += 1) {
-    const visualIndex = layerCount - 1 - level;
-    planes[level] = {
-      left: marginX,
-      top: topMargin + visualIndex * (planeHeight + gap),
-      width: planeWidth,
-      height: planeHeight,
-      skew,
-    };
-  }
-
-  return planes;
 }
 
 function resizeCanvas(canvas) {
